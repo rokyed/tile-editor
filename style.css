@@ -1,0 +1,100 @@
+* {
+  box-sizing: border-box;
+  font-family: Teko, sans-serif;
+  color: #fff;
+}
+
+body,
+html {
+  background: #333;
+  display: grid;
+  grid-template-columns: 200px auto;
+  grid-template-rows: 40px auto;
+  align-items: stretch;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+nav {
+  grid-row-start: 1;
+  grid-row-end: span 1;
+  grid-column-start: 1;
+  grid-column-end: span 2;
+  background: #222;
+  gap: 4px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+
+side {
+  grid-row-start: 2;
+  gird-row-end: span 1;
+  grid-column-start: 1;
+  grid-column-end: span 1;
+  background: #444;
+  flex: 0 0 200px;
+  gap: 4px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+main {
+  grid-row-start: 2;
+  grid-row-end: span 1;
+  grid-column-start: 2;
+  grid-column-end: span 1;
+  background: #555;
+  flex: 3;
+  padding: 4px;
+}
+
+canvas {
+  background: #666;
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+nav label {
+  background: #777;
+  color: #fff;
+  padding: 0;
+  border: 1px solid #999;
+  display:: block;
+}
+
+label input {
+  min-height: 0px;
+  max-width: 100%;
+  min-width: 0px;
+  color: #fff;
+  margin: 0;
+}
+
+button {
+  background:#555;
+  color:#FFF;
+}
+
+input {
+  background: #222;
+  color: #fff;
+}
+
+x-renderer {
+  background: #666;
+  display: block;
+  height: 100%;
+  width: 100%;
+}
