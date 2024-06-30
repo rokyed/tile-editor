@@ -56,13 +56,11 @@ class XRenderer extends HTMLElement {
     this.render();
 
     this.addEventListener("scroll", () => {
-      console.log("scrolling");
       this.render();
     });
   }
 
   setWidthAndHeight(width, height) {
-    console.log("setting width and height", width, height);
     //set scrollable area
     this.canvasSizeDot.style.top = `${height * this.cellSize}px`;
     this.canvasSizeDot.style.left = `${width * this.cellSize}px`;
@@ -74,6 +72,49 @@ class XRenderer extends HTMLElement {
         tile.remove();
       }
     });
+  }
+
+  lazyRender() {
+    this.#deferRender();
+  }
+
+  #deferRender(skipTimeout) {
+    if (skipTimeout) {
+      requestAnimationFrame(() => {
+        this.render();
+      });
+      return;
+    }
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        this.render();
+      });
+    }, 100);
+  }
+
+  zoomIn() {
+    this.cellSize = this.cellSize * 2;
+
+    if (this.cellSize > 256) {
+      this.cellSize = 256;
+    }
+
+    this.#deferRender();
+  }
+
+  zoomOut() {
+    this.cellSize = this.cellSize / 2;
+
+    if (this.cellSize < 8) {
+      this.cellSize = 8;
+    }
+
+    this.#deferRender();
+  }
+
+  zoomReset() {
+    this.cellSize = 64;
+    this.#deferRender();
   }
 
   render() {
@@ -98,20 +139,26 @@ class XRenderer extends HTMLElement {
       const cellId = `cell-${cell.x}-${cell.y}`;
 
       if (oldVisibleCells.includes(cellId)) {
-        return;
+        const tile = this.canvas.querySelector(`div[data-cell-id="${cellId}"]`);
+        tile.style.width = `${this.cellSize}px`;
+        tile.style.height = `${this.cellSize}px`;
+        tile.style.position = "absolute";
+        tile.style.left = `${cell.x * this.cellSize}px`;
+        tile.style.top = `${cell.y * this.cellSize}px`;
+        this.innerHTML = `${cell.x},${cell.y}`;
+      } else {
+        const tile = document.createElement("div");
+        tile.setAttribute("data-type", "tile");
+        tile.setAttribute("data-cell-id", cellId);
+        this.visibleCells.push(cellId);
+        tile.style.width = `${this.cellSize}px`;
+        tile.style.height = `${this.cellSize}px`;
+        tile.style.position = "absolute";
+        tile.style.left = `${cell.x * this.cellSize}px`;
+        tile.style.top = `${cell.y * this.cellSize}px`;
+        tile.innerHTML = `${cell.x},${cell.y}`;
+        this.canvas.appendChild(tile);
       }
-
-      const tile = document.createElement("div");
-      tile.setAttribute("data-type", "tile");
-      tile.setAttribute("data-cell-id", cellId);
-      this.visibleCells.push(cellId);
-      tile.style.width = `${this.cellSize}px`;
-      tile.style.height = `${this.cellSize}px`;
-      tile.style.position = "absolute";
-      tile.style.left = `${cell.x * this.cellSize}px`;
-      tile.style.top = `${cell.y * this.cellSize}px`;
-      tile.innerHTML = `${cell.x},${cell.y}`;
-      this.canvas.appendChild(tile);
     });
 
   }
