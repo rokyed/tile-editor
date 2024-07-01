@@ -14,7 +14,7 @@ export class Tools {
   noopTool() { };
 
   paintTool(cell) {
-    cell.setTile(this.currentBrush);
+    cell.setTile(Tools.getInstance().currentBrush);
   }
 
   eraseTool(cell){
@@ -26,14 +26,21 @@ export class Tools {
   fillTool(cell) {
     const currentTile = cell.getTile();
     let cells = [];
-    cell.getAdjacentWhere((adjacent) => {
+    cell.getAdjacentCellsWhere(cells, (adjacent, arr) => {
+      if (arr.includes(adjacent)) {
+        return false;
+      }
+
+
       return adjacent.getTile() === currentTile;
     });
 
     cells.forEach((cell) => {
-      cell.setTile(this.currentBrush);
+      cell.setTile(Tools.getInstance().currentBrush);
     });
   }
 
 
 }
+
+window.TOOLS = Tools.getInstance();

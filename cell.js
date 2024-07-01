@@ -17,6 +17,7 @@ export class Cell {
   }
 
   setTile(tile) {
+    console.log(tile);
     this.tile = tile;
   }
 
@@ -71,7 +72,7 @@ export class Cell {
   getAdjacentCellsWhere(arr, condition) {
     const adjacents = [this.adjacentTop, this.adjacentBottom, this.adjacentLeft, this.adjacentRight];
 
-    let result = adjacents.filter(cell => cell && condition(cell));
+    let result = adjacents.filter(cell => cell && condition(cell, arr));
 
     for (let cell of result) {
       if (!arr.includes(cell)) {

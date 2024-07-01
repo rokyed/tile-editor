@@ -51,6 +51,8 @@ export class Scenario {
     if (!cell)
       return;
 
+    console.log(this.currentTool);
+
     this.currentTool(cell);
     this.fireUpdate();
   }
@@ -184,7 +186,7 @@ export class Scenario {
       clearTimeout(this.updatingTimer);
     }
     this.updatingTimer = setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('update.ui'));
+      window.dispatchEvent(new CustomEvent('update.ui', { force: true }));
     }, 60);
   }
 }

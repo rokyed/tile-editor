@@ -7,6 +7,41 @@ class XRenderer extends HTMLElement {
   visibleCells = [];
   deferRender = false;
   renderStats = false;
+  baseCSS = `
+    :host {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      position: relative;
+      overflow: scroll;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+    #canvas-size {
+      width: 1px;
+      height: 1px;
+      position:absolute;
+      color: #fff;
+      background-color: #fff;
+    }
+
+    [data-type="tile"] {
+      position: absolute;
+      outline: 1px solid #333;
+      box-sizing: border-box;
+      background: #000;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      padding: 5px;
+      cursor: pointer;
+      background-size: cover;
+    }
+
+  `;
 
 
 
@@ -14,39 +49,8 @@ class XRenderer extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          width: 100%;
-          height: 100%;
-          background-color: #000;
-          position: relative;
-          overflow: scroll;
-        }
-        #canvas-container {
-          width: 100%;
-          height: 100%;
-          overflow: auto;
-        }
-        #canvas-size {
-          width: 1px;
-          height: 1px;
-          position:absolute;
-          color: #fff;
-          background-color: #fff;
-        }
-
-        [data-type="tile"] {
-          position: absolute;
-          outline: 1px solid #333;
-          box-sizing: border-box;
-          background: #000;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          padding: 5px;
-          cursor: pointer;
-        }
-
+      <style name="styles">
+        ${this.baseCSS}
       </style>
       <div id="canvas-container" style="width: 100%; height: 100%;">
         <div id="canvas-size">
@@ -58,6 +62,27 @@ class XRenderer extends HTMLElement {
     this.canvasSizeDot = this.shadowRoot.getElementById("canvas-size");
   }
 
+  writeTileTexturesAsCSS() {
+    let css = "";
+
+    Scenario.getInstance().getPalette().forEach((tile, index) => {
+      css += `
+        .tile-${index} {
+          background-color: #FF00FF;
+          background-image: url("${tile.getImage()}");
+        }
+        `;
+    });
+
+    this.shadowRoot.querySelector("style[name='styles']").innerHTML = `
+      ${this.baseCSS}
+
+      ${css}
+
+      `;
+  }
+
+
   connectedCallback() {
     this.render();
 
@@ -65,9 +90,9 @@ class XRenderer extends HTMLElement {
       this.render();
     });
 
-    window.addEventListener("update.ui", () => {
-      console.log("update.ui event received")
-      this.render();
+    window.addEventListener("update.ui", (event) => {
+      let force = event?.detail?.force ?? false;
+      this.#deferRender();
     });
 
     this.addEventListener("click", (event) => {
@@ -78,6 +103,8 @@ class XRenderer extends HTMLElement {
       if (!tile) {
         return;
       }
+
+      console.log("Tile clicked", tile.getAttribute("data-cell-id"))
 
       let cellId = tile.getAttribute("data-cell-id");
       let cellX = tile.getAttribute("data-cell-x");
@@ -160,12 +187,7 @@ class XRenderer extends HTMLElement {
     let t = cell.getTile();
 
     if (t) {
-      let img = t.getImage();
-
-      if (img) {
-        tile.style.backgroundImage = `url(${img})`;
-        tile.style.backgroundSize = "cover";
-      }
+      tile.className = `tile-${t.getIndex()}`;
 
       if (this.renderStats) {
         tile.style.outline = `2px solid ${t.getColor()}`;
@@ -174,9 +196,9 @@ class XRenderer extends HTMLElement {
   }
 
   render(force) {
-    console.time('render');
     const scenario = Scenario.getInstance();
 
+    this.writeTileTexturesAsCSS();
     this.setWidthAndHeight(scenario.getMapWidth(), scenario.getMapHeight());
 
     let box = this.getBoundingClientRect();
