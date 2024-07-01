@@ -12,7 +12,7 @@
     <nav>
       <button id="save">Save Scenario</button>
       <button id="load">Load Scenario</button>
-      <button id="clear">Clear Scenario</button>
+      <button id="new_scenario">Clear Scenario</button>
       <label>
         Width
         <input id="scenario_width" type="number" placeholder="Width" value="64"/>
@@ -21,8 +21,14 @@
         Height
         <input id="scenario_height" type="number" placeholder="Height" value="64"/>
       </label>
+      <button id="load_palette">Load Palette</button>
+      <label>
+        Palette Tile Size
+        <input id="palette_tile_size" type="number" placeholder="Tile Size" value="32"/>
+      </label>
     </nav>
     <side>
+      <button id="toggle_stats">Stats</button>
       <div class="side_row">
         <button id="zoom_in">+</button>
         <button id="zoom_out">-</button>

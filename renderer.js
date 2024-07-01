@@ -1,4 +1,4 @@
-import {Scenario} from './scenario.js';
+import { Scenario } from './scenario.js';
 
 class XRenderer extends HTMLElement {
   canvas = null; //DIV element containing tiles
@@ -6,12 +6,13 @@ class XRenderer extends HTMLElement {
   canvasSizeDot = null; //DIV element containing canvas size
   visibleCells = [];
   deferRender = false;
+  renderStats = false;
 
 
 
   constructor() {
     super();
-    this.attachShadow({mode: "open"});
+    this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -39,6 +40,11 @@ class XRenderer extends HTMLElement {
           position: absolute;
           outline: 1px solid #333;
           box-sizing: border-box;
+          background: #000;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          padding: 5px;
+          cursor: pointer;
         }
 
       </style>
@@ -57,6 +63,26 @@ class XRenderer extends HTMLElement {
 
     this.addEventListener("scroll", () => {
       this.render();
+    });
+
+    window.addEventListener("update.ui", () => {
+      console.log("update.ui event received")
+      this.render();
+    });
+
+    this.addEventListener("click", (event) => {
+      const tile = event.composedPath().find((element) => {
+        return element.getAttribute("data-type") === "tile";
+      });
+
+      if (!tile) {
+        return;
+      }
+
+      let cellId = tile.getAttribute("data-cell-id");
+      let cellX = tile.getAttribute("data-cell-x");
+      let cellY = tile.getAttribute("data-cell-y");
+      let cell = Scenario.getInstance().executeTool(parseInt(cellX), parseInt(cellY));
     });
   }
 
@@ -81,13 +107,13 @@ class XRenderer extends HTMLElement {
   #deferRender(skipTimeout) {
     if (skipTimeout) {
       requestAnimationFrame(() => {
-        this.render();
+        this.render(true);
       });
       return;
     }
     setTimeout(() => {
       requestAnimationFrame(() => {
-        this.render();
+        this.render(true);
       });
     }, 100);
   }
@@ -105,8 +131,8 @@ class XRenderer extends HTMLElement {
   zoomOut() {
     this.cellSize = this.cellSize / 2;
 
-    if (this.cellSize < 8) {
-      this.cellSize = 8;
+    if (this.cellSize < 16) {
+      this.cellSize = 16;
     }
 
     this.#deferRender();
@@ -117,7 +143,38 @@ class XRenderer extends HTMLElement {
     this.#deferRender();
   }
 
-  render() {
+  toggleStats() {
+    this.renderStats = !this.renderStats;
+    this.#deferRender(true);
+  }
+
+  cellToTile(cell, tile) {
+    tile.style.left = `${cell.x * this.cellSize}px`;
+    tile.style.top = `${cell.y * this.cellSize}px`;
+    tile.style.width = `${this.cellSize}px`;
+    tile.style.height = `${this.cellSize}px`;
+
+    if (this.renderStats) {
+      tile.innerText = cell.getStats();
+    }
+    let t = cell.getTile();
+
+    if (t) {
+      let img = t.getImage();
+
+      if (img) {
+        tile.style.backgroundImage = `url(${img})`;
+        tile.style.backgroundSize = "cover";
+      }
+
+      if (this.renderStats) {
+        tile.style.outline = `2px solid ${t.getColor()}`;
+      }
+    }
+  }
+
+  render(force) {
+    console.time('render');
     const scenario = Scenario.getInstance();
 
     this.setWidthAndHeight(scenario.getMapWidth(), scenario.getMapHeight());
@@ -125,8 +182,8 @@ class XRenderer extends HTMLElement {
     let box = this.getBoundingClientRect();
     let top = this.scrollTop;
     let left = this.scrollLeft;
-    let hCenter = Math.floor(box.width / 2 + left)/this.cellSize;
-    let vCenter = Math.floor(box.height / 2 + top)/this.cellSize;
+    let hCenter = Math.floor(box.width / 2 + left) / this.cellSize;
+    let vCenter = Math.floor(box.height / 2 + top) / this.cellSize;
     let maxSpread = Math.floor(Math.max(box.width, box.height) / this.cellSize);
 
     const cells = scenario.getCellsZone(hCenter, vCenter, maxSpread);
@@ -137,40 +194,22 @@ class XRenderer extends HTMLElement {
 
     cells.forEach(cell => {
       const cellId = `cell-${cell.x}-${cell.y}`;
-
-      if (oldVisibleCells.includes(cellId)) {
-        const tile = this.canvas.querySelector(`div[data-cell-id="${cellId}"]`);
-        tile.style.width = `${this.cellSize}px`;
-        tile.style.height = `${this.cellSize}px`;
-        tile.style.position = "absolute";
-        tile.style.left = `${cell.x * this.cellSize}px`;
-        tile.style.top = `${cell.y * this.cellSize}px`;
-        this.innerHTML = `${cell.x},${cell.y}`;
+      let tile = null;
+      if (oldVisibleCells.includes(cellId) && !force) {
+        tile = this.canvas.querySelector(`div[data-cell-id="${cellId}"]`);
       } else {
-        const tile = document.createElement("div");
+        tile = document.createElement("div");
         tile.setAttribute("data-type", "tile");
         tile.setAttribute("data-cell-id", cellId);
+        tile.setAttribute("data-cell-x", cell.x);
+        tile.setAttribute("data-cell-y", cell.y);
         this.visibleCells.push(cellId);
-        tile.style.width = `${this.cellSize}px`;
-        tile.style.height = `${this.cellSize}px`;
-        tile.style.position = "absolute";
-        tile.style.left = `${cell.x * this.cellSize}px`;
-        tile.style.top = `${cell.y * this.cellSize}px`;
-        tile.innerHTML = `${cell.x},${cell.y}`;
         this.canvas.appendChild(tile);
       }
+
+      this.cellToTile(cell, tile);
     });
-
-  }
-
-  triggerDeferRender() {
-    if (this.deferRender) {
-      clearTimeout(this.deferRender);
-    }
-
-    this.deferRender = setTimeout(() => {
-      this.render();
-    }, 100);
+    console.timeEnd('render');
   }
 }
 

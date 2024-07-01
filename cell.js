@@ -1,20 +1,35 @@
 export class Cell {
   x = -1;
   y = -1;
+  layer = 0;
   options = {};
+  tile = null;
   adjacentTop = null;
   adjacentBottom = null;
   adjacentLeft = null;
   adjacentRight = null;
 
-  constructor(x, y, cellOptions) {
+  constructor(x, y, layer = 0, tile = null, cellOptions = {}) {
     this.x = x;
     this.y = y;
-    this.options = cellOptions;
+    this.tile = tile;
+    this.options = { ...this.options,... cellOptions };
+  }
+
+  setTile(tile) {
+    this.tile = tile;
+  }
+
+  getTile() {
+    return this.tile;
   }
 
   setCellOptions(options) {
-    this.options = options;
+    this.options = { ...this.options, ...options };
+  }
+
+  getCellOptions() {
+    return this.options;
   }
 
   isAtOrInRange(x, y, spread) {
@@ -47,6 +62,23 @@ export class Cell {
 
   setAdjacentRight(cell) {
     this.adjacentRight = cell;
+  }
+
+  getStats() {
+    return `X: ${this.x}\nY: ${this.y}`;
+  }
+
+  getAdjacentCellsWhere(arr, condition) {
+    const adjacents = [this.adjacentTop, this.adjacentBottom, this.adjacentLeft, this.adjacentRight];
+
+    let result = adjacents.filter(cell => cell && condition(cell));
+
+    for (let cell of result) {
+      if (!arr.includes(cell)) {
+        arr.push(cell);
+        cell.getAdjacentCellsWhere(arr, condition);
+      }
+    }
   }
 
   getNextCells(direction, arr, count) {
