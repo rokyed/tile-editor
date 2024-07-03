@@ -1,3 +1,13 @@
+
+const CORRELATED_DIRECTIONS = {
+  left: 'adjacentLeft',
+  right: 'adjacentRight',
+  top: 'adjacentTop',
+  bottom: 'adjacentBottom'
+};
+
+const POSSIBLE_DIRECTIONS = ['left', 'right', 'top', 'bottom'];
+
 export class Cell {
   x = -1;
   y = -1;
@@ -83,9 +93,7 @@ export class Cell {
   }
 
   getNextCells(direction, arr, count) {
-    const possibleDirections = ['left', 'right', 'top', 'bottom']
-
-    if (!possibleDirections.includes(direction)) {
+    if (!POSSIBLE_DIRECTIONS.includes(direction)) {
       return arr;
     }
 
@@ -93,14 +101,7 @@ export class Cell {
       return arr;
     }
 
-    const correlatedDirection = {
-      left: 'adjacentLeft',
-      right: 'adjacentRight',
-      top: 'adjacentTop',
-      bottom: 'adjacentBottom'
-    }
-
-    let adjacent = correlatedDirection[direction];
+    let adjacent = CORRELATED_DIRECTIONS[direction];
 
     if (this[adjacent]) {
       arr.push(this[adjacent]);

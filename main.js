@@ -1,7 +1,9 @@
 import { Scenario } from "./scenario.js";
 import { Tools } from "./tools.js";
-import './renderer.js';
+//import './renderer.js';
+import './canvasRenderer.js';
 import './palette.js';
+import './tileElement.js';
 
 document.addEventListener("DOMContentLoaded", function () {
   Scenario.getInstance().setCurrentTool(Tools.getInstance().noopTool);
@@ -17,13 +19,13 @@ document.addEventListener("DOMContentLoaded", function () {
   scenarioWidthInput.addEventListener("change", function () {
     const scenario = Scenario.getInstance();
     scenario.setMapWidth(this.value);
-    renderer.lazyRender();
+    renderer.resetViewport();
   });
 
   scenarioHeightInput.addEventListener("change", function () {
     const scenario = Scenario.getInstance();
     scenario.setMapHeight(this.value);
-    renderer.lazyRender();
+    renderer.resetViewport();
   });
 
   let zoomInButton = document.querySelector("button#zoom_in");
@@ -115,12 +117,29 @@ document.addEventListener("DOMContentLoaded", function () {
     fileInput.click();
   });
 
+  const brushes = document.querySelectorAll('.brush');
+  const visuallySelectBrush = (brush) => {
+    brushes.forEach((brush) => {
+      brush.classList.remove('selected');
+    });
+    brush.classList.add('selected');
+  };
+
+  const brushNone = document.querySelector('button[name="brush_none"]');
+  brushNone.addEventListener("click", function () {
+    const scenario = Scenario.getInstance();
+    const tools = Tools.getInstance();
+    scenario.setCurrentTool(tools.noopTool);
+    visuallySelectBrush(brushNone);
+  });
+
   const brushSingleButton = document.querySelector('button[name="brush_single"]');
 
   brushSingleButton.addEventListener("click", function () {
     const scenario = Scenario.getInstance();
     const tools = Tools.getInstance();
     scenario.setCurrentTool(tools.paintTool);
+    visuallySelectBrush(brushSingleButton);
   });
 
   const brushFillButton = document.querySelector('button[name="brush_fill"]');
@@ -129,6 +148,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const scenario = Scenario.getInstance();
     const tools = Tools.getInstance();
     scenario.setCurrentTool(tools.fillTool);
+    visuallySelectBrush(brushFillButton);
   });
 
   let newScenarioButton = document.querySelector("button#new_scenario");
@@ -139,5 +159,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let scenario = Scenario.getInstance();
     scenario.newScenario(scenarioWidth, scenarioHeight);
+  });
+
+  window.addEventListener("brush.change", function (e) {
+    document.querySelector('[name="brush_preview"]').setAttribute('image', e.detail.getImage());
   });
 });

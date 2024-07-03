@@ -62,6 +62,7 @@ main {
   background: #555;
   flex: 3;
   padding: 4px;
+  overflow: hidden;
 }
 
 canvas {
@@ -90,6 +91,11 @@ label input {
 button {
   background:#555;
   color:#FFF;
+  cursor: pointer;
+}
+
+button:hover {
+  background:#777;
 }
 
 input {
@@ -102,6 +108,7 @@ x-renderer {
   display: block;
   height: 100%;
   width: 100%;
+  cursor: pointer;
 }
 
 .row {
@@ -114,4 +121,8 @@ x-renderer {
 
 .row > * {
   flex: 1;
+}
+
+.brush.selected {
+  background: #777;
 }

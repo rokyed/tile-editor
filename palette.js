@@ -20,8 +20,11 @@ export class XPalette extends HTMLElement {
           height: 100%;
           display: flex;
           flex-wrap: wrap;
-          gap: 2px;
+          gap: 4px;
           overflow-y: scroll;
+          justify-content: center;
+          border: 1px solid #333;
+          border-radius: 4px;
         }
 
         .tile {
@@ -58,9 +61,7 @@ export class XPalette extends HTMLElement {
       const tileObject = Scenario.getInstance().getTileFromPalette(parseInt(tileIndex));
 
       Tools.getInstance().currentBrush = tileObject;
-      console.log(tile);
-      console.log(tile.style.backgroundColor);
-      console.log(tile.style.backgroundImage);
+      window.dispatchEvent(new CustomEvent("brush.change", { detail: tileObject }));
     });
   }
 
@@ -69,11 +70,10 @@ export class XPalette extends HTMLElement {
   }
 
   renderTile(tile) {
-    let tileElement = document.createElement("div");
+    let tileElement = document.createElement("x-tile-element");
     tileElement.classList.add("tile");
     tileElement.setAttribute("data-tile-index", tile.getIndex());
-    tileElement.style.backgroundColor = tile.getColor();
-    tileElement.style.backgroundImage = `url(${tile.getImage()})`;
+    tileElement.setAttribute("image", tile.getImage());
     this.container.appendChild(tileElement);
   }
   render() {

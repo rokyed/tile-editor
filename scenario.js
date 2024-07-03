@@ -1,5 +1,5 @@
-import {Cell} from './cell.js';
-import {Tile} from './tile.js';
+import { Cell } from './cell.js';
+import { Tile } from './tile.js';
 
 export class Scenario {
 
@@ -46,12 +46,8 @@ export class Scenario {
 
     let cell = this.getCellAt(x, y);
 
-    console.log(cell);
-
     if (!cell)
       return;
-
-    console.log(this.currentTool);
 
     this.currentTool(cell);
     this.fireUpdate();
@@ -187,7 +183,7 @@ export class Scenario {
     }
     this.updatingTimer = setTimeout(() => {
       window.dispatchEvent(new CustomEvent('update.ui', { force: true }));
-    }, 60);
+    }, 0);
   }
 }
 

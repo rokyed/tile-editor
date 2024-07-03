@@ -39,8 +39,6 @@ export class Tools {
       cell.setTile(Tools.getInstance().currentBrush);
     });
   }
-
-
 }
 
 window.TOOLS = Tools.getInstance();
