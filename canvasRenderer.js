@@ -126,6 +126,7 @@ export class XCanvasRenderer extends HTMLElement {
       const y = centerY + (cell.y - this.y) * this.cellSize;
       const tile = cell.getTile();
       if (tile) {
+        debugger;
         const image = this.getImageFromCache(tile.getImage());
         if (image) {
           this.ctx.imageSmoothingEnabled = false;

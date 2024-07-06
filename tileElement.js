@@ -1,7 +1,7 @@
 
 export class TileElement extends HTMLElement {
   static get observedAttributes() {
-    return ['image']
+    return ['image', 'border']
   }
 
   constructor() {
@@ -16,6 +16,7 @@ export class TileElement extends HTMLElement {
           height: 64px;
           background-size: cover;
           cursor: pointer;
+          border: 1px solid #f0f;
         }
       </style>
     `;
@@ -24,6 +25,10 @@ export class TileElement extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'image') {
       this.shadowRoot.host.style.backgroundImage = `url(${newValue})`;
+    }
+
+    if (name === 'border') {
+      this.shadowRoot.host.style.borderColor = newValue;
     }
   }
 }

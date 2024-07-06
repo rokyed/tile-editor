@@ -25,15 +25,11 @@ export class Tools {
 
   fillTool(cell) {
     const currentTile = cell.getTile();
-    let cells = [];
+    let cells = new Set();
     cell.getAdjacentCellsWhere(cells, (adjacent, arr) => {
-      if (arr.includes(adjacent)) {
-        return false;
-      }
-
-
       return adjacent.getTile() === currentTile;
     });
+
 
     cells.forEach((cell) => {
       cell.setTile(Tools.getInstance().currentBrush);

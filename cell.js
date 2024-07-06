@@ -79,14 +79,16 @@ export class Cell {
     return `X: ${this.x}\nY: ${this.y}`;
   }
 
+
   getAdjacentCellsWhere(arr, condition) {
     const adjacents = [this.adjacentTop, this.adjacentBottom, this.adjacentLeft, this.adjacentRight];
 
     let result = adjacents.filter(cell => cell && condition(cell, arr));
 
+
     for (let cell of result) {
-      if (!arr.includes(cell)) {
-        arr.push(cell);
+      if (!arr.has(cell)) {
+        arr.add(cell);
         cell.getAdjacentCellsWhere(arr, condition);
       }
     }

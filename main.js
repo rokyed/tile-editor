@@ -12,9 +12,12 @@ document.addEventListener("DOMContentLoaded", function () {
   let scenarioHeightInput = document.querySelector(`input#scenario_height`);
   let renderer = document.querySelector("x-renderer");
 
+  window.addEventListener('resize', function () {
+    renderer.lazyRender();
+  });
+
   scenarioWidthInput.value = Scenario.getInstance().getMapWidth();
   scenarioHeightInput.value = Scenario.getInstance().getMapHeight();
-
 
   scenarioWidthInput.addEventListener("change", function () {
     const scenario = Scenario.getInstance();
