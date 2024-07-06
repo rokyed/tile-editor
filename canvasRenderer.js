@@ -33,8 +33,12 @@ export class XCanvasRenderer extends HTMLElement {
   connectedCallback() {
     this.resetViewport();
 
-    window.addEventListener('update.ui', () => {
-      this.render();
+    window.addEventListener('update.ui', (event) => {
+      if (event?.detail?.force) {
+        this.resetViewport();
+      } else {
+        this.render();
+      }
     });
 
    // this.addEventListener('click', this.onTileInteract.bind(this));
@@ -164,7 +168,6 @@ export class XCanvasRenderer extends HTMLElement {
 
 
   resetViewport() {
-
     this.x = Math.floor(Scenario.getInstance().getMapWidth() / 2);
     this.y = Math.floor(Scenario.getInstance().getMapHeight() / 2);
     this.xPixel = this.x;

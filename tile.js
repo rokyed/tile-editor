@@ -1,5 +1,12 @@
 
 export class Tile {
+
+  static deserialize(data) {
+    const tile = new Tile(data.index, data.width, data.height, data.image, data.color, data.options);
+    return tile;
+  }
+
+
   index= -1;
   width = 64;
   height = 64;
@@ -36,5 +43,16 @@ export class Tile {
 
   getIndex() {
     return this.index;
+  }
+
+  serialize() {
+    return {
+      index: this.index,
+      width: this.width,
+      height: this.height,
+      image: this.image,
+      color: this.color,
+      properties: this.properties,
+    };
   }
 }

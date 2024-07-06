@@ -13,6 +13,18 @@ export class Scenario {
     return Scenario.instance;
   }
 
+  static deserialize(data) {
+    let instance = Scenario.getInstance();
+    instance.setMapSize(data.mapSize[0], data.mapSize[1]);
+    instance.palette = data.palette.map(tile => Tile.deserialize(tile));
+    instance.mapCells = data.mapCells.map(cell => Cell.deserialize(cell, instance.palette));
+    instance.setAdjacents();
+
+    requestAnimationFrame(() => {
+      instance.fireUpdate(true);
+    });
+  }
+
   currentTool = () => { };
   layerCount = 1;
   mapSize = [0, 0];
@@ -22,6 +34,14 @@ export class Scenario {
 
   constructor(width, height) {
     this.newScenario(width, height);
+  }
+
+  serialize() {
+    return {
+      mapSize: this.mapSize,
+      mapCells: this.mapCells.map(cell => cell.serialize()),
+      palette: this.palette.map(tile => tile.serialize())
+    }
   }
 
   setMapSize(width, height) {

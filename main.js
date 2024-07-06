@@ -8,6 +8,41 @@ import './tileElement.js';
 document.addEventListener("DOMContentLoaded", function () {
   Scenario.getInstance().setCurrentTool(Tools.getInstance().noopTool);
 
+  let saveButton = document.querySelector("button#save");
+  let loadButton = document.querySelector("button#load");
+
+  saveButton.addEventListener("click", function () {
+    let scenario = Scenario.getInstance();
+    let data = scenario.serialize();
+    let json = JSON.stringify(data);
+    let blob = new Blob([json], { type: "application/json" });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.href
+      = url;
+    a.download = "scenario.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  loadButton.addEventListener("click", function () {
+    let fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".json";
+    fileInput.addEventListener("change", function () {
+      let file = fileInput.files[0];
+      let reader = new FileReader();
+      reader.onload = function () {
+        let json = reader.result;
+        let data = JSON.parse(json);
+        Scenario.deserialize(data);
+      };
+      reader.readAsText(file);
+    });
+    fileInput.click();
+  });
+
+
   let scenarioWidthInput = document.querySelector(`input#scenario_width`);
   let scenarioHeightInput = document.querySelector(`input#scenario_height`);
   let renderer = document.querySelector("x-renderer");

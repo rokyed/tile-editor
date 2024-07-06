@@ -9,6 +9,13 @@ const CORRELATED_DIRECTIONS = {
 const POSSIBLE_DIRECTIONS = ['left', 'right', 'top', 'bottom'];
 
 export class Cell {
+  static deserialize(data, tileset) {
+    const cell = new Cell(data.x, data.y, data.layer);
+    cell.setTile(tileset[data.tile]);
+    cell.setCellOptions(data.options);
+    return cell;
+  }
+
   x = -1;
   y = -1;
   layer = 0;
@@ -117,4 +124,15 @@ export class Cell {
       this[adjacent]?.getNextCells(direction, arr, count - 1);
     }
   }
+
+  serialize() {
+    return {
+      x: this.x,
+      y: this.y,
+      layer: this.layer,
+      options: this.options,
+      tile: this.tile?.getIndex()
+    };
+  }
+
 }
