@@ -178,9 +178,8 @@ export class Scenario {
   }
 
   fireUpdate() {
-    if (this.updatingTimer) {
-      clearTimeout(this.updatingTimer);
-    }
+    clearTimeout(this.updatingTimer);
+
     this.updatingTimer = setTimeout(() => {
       window.dispatchEvent(new CustomEvent('update.ui', { force: true }));
     }, 0);

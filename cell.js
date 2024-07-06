@@ -27,7 +27,6 @@ export class Cell {
   }
 
   setTile(tile) {
-    console.log(tile);
     this.tile = tile;
   }
 
@@ -81,16 +80,23 @@ export class Cell {
 
 
   getAdjacentCellsWhere(arr, condition) {
-    const adjacents = [this.adjacentTop, this.adjacentBottom, this.adjacentLeft, this.adjacentRight];
+    const visited = new Set();
+    const queue = [this];
 
-    let result = adjacents.filter(cell => cell && condition(cell, arr));
+    while (queue.length) {
+      const cell = queue.shift();
+      const adjacents = [cell.adjacentTop, cell.adjacentBottom, cell.adjacentLeft, cell.adjacentRight];
 
+      let neighbors = adjacents.filter(cell => cell && condition(cell, arr));
 
-    for (let cell of result) {
-      if (!arr.has(cell)) {
-        arr.add(cell);
-        cell.getAdjacentCellsWhere(arr, condition);
+      for (let i = 0; i < neighbors.length; i++) {
+
+        if (!visited.has(neighbors[i])) {
+          queue.push(neighbors[i]);
+          visited.add(neighbors[i]);
+        }
       }
+      arr.add(cell);
     }
   }
 

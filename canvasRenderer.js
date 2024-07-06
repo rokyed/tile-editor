@@ -108,7 +108,7 @@ export class XCanvasRenderer extends HTMLElement {
 
   render() {
     let rect = this.getBoundingClientRect();
-    this.spread = Math.floor((Math.max(rect.width, rect.height) / this.cellSize) / 2) + OVERSPILL;
+    this.spread = Math.floor((Math.max(rect.width, rect.height) / this.cellSize) / 4) + OVERSPILL;
     this.canvas.width = rect.width;
     this.canvas.height = rect.height;
     this.canvas.style.width = '100%';
@@ -126,7 +126,6 @@ export class XCanvasRenderer extends HTMLElement {
       const y = centerY + (cell.y - this.y) * this.cellSize;
       const tile = cell.getTile();
       if (tile) {
-        debugger;
         const image = this.getImageFromCache(tile.getImage());
         if (image) {
           this.ctx.imageSmoothingEnabled = false;
