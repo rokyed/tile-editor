@@ -1,7 +1,7 @@
 import { Scenario } from "./scenario.js";
 const DEFAULT_CELL_SIZE = 32;
 const DEFAULT_CELL_MAX_ZOOM = 128;
-const DEFAULT_CELL_MIN_ZOOM = 8;
+const DEFAULT_CELL_MIN_ZOOM = 2;
 const OVERSPILL = 2;
 
 export class XCanvasRenderer extends HTMLElement {
