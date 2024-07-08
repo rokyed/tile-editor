@@ -17,6 +17,7 @@ export class XCanvasRenderer extends HTMLElement {
   imageRenderer = null;
   canvas = null;
   isInteracting = false;
+  renderCurrentLayerOnly = false;
 
   constructor() {
     super();
@@ -150,22 +151,37 @@ export class XCanvasRenderer extends HTMLElement {
         this.ctx.imageSmoothingEnabled = false;
         this.ctx.drawImage(bg, x, y, this.cellSize, this.cellSize);
       }
+      if (this.renderStats) {
+        this.ctx.strokeStyle = '#ddd';
+        this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
+      }
 
-      for (let k in tiles) {
-        const tile = tiles[k];
+      if (this.renderCurrentLayerOnly) {
+        const tile = tiles[scenario.currentLayer];
         if (tile) {
           const image = this.getImageFromCache(tile.getImage());
           if (image) {
             this.ctx.imageSmoothingEnabled = false;
             this.ctx.drawImage(image, x, y, this.cellSize, this.cellSize);
           }
-        } 
+        }
+      } else {
+        for (let k in tiles) {
+          const tile = tiles[k];
+          if (tile) {
+            const image = this.getImageFromCache(tile.getImage());
+            if (image) {
+              this.ctx.imageSmoothingEnabled = false;
+              this.ctx.drawImage(image, x, y, this.cellSize, this.cellSize);
+            }
+          } 
+        }
       }
+
+
       if (this.renderStats) {
         this.ctx.fillStyle = '#FFF';
         this.ctx.fillText(`(${cell.x}, ${cell.y})`, x, y + this.cellSize);
-        this.ctx.strokeStyle = '#d33';
-        this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
       }
     });
   }
@@ -210,6 +226,11 @@ export class XCanvasRenderer extends HTMLElement {
   }
 
   lazyRender() {
+    this.rafRender();
+  }
+
+  toggleRenderOnlyCurrentLayer() {
+    this.renderCurrentLayerOnly = !this.renderCurrentLayerOnly;
     this.rafRender();
   }
 

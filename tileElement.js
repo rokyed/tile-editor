@@ -1,7 +1,7 @@
 
 export class TileElement extends HTMLElement {
   static get observedAttributes() {
-    return ['image', 'border']
+    return ['image', 'border', 'data-no-tile']
   }
 
   constructor() {
@@ -32,6 +32,10 @@ export class TileElement extends HTMLElement {
 
     if (name === 'border') {
       this.shadowRoot.host.style.borderColor = newValue;
+    }
+
+    if (name === 'data-no-tile' && newValue) {
+      this.shadowRoot.host.style.backgroundImage = "none";
     }
   }
 }

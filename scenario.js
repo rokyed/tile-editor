@@ -3,7 +3,7 @@ import { Tile } from './tile.js';
 import { defaultImage, defaultImageWidth, defaultImageHeight } from './staticData.js';
 
 const DEFAULT_UPPER_LAYER_LIMIT = 32;
-const DEFAULT_LOWER_LAYER_LIMIT = 1;
+const DEFAULT_LOWER_LAYER_LIMIT = 0;
 
 export class Scenario {
 
@@ -33,7 +33,7 @@ export class Scenario {
 
   currentTool = () => { };
   layerCount = 1;
-  currentLayer = 0;
+  currentLayer = DEFAULT_LOWER_LAYER_LIMIT;
   mapSize = [0, 0];
   mapCells = [];
   palette = [];
@@ -140,12 +140,12 @@ export class Scenario {
   }
 
   decrementLayer() {
-    let newLayer = this.currnetLayer - 1; 
+    let newLayer = this.currentLayer - 1; 
 
     if (newLayer < DEFAULT_LOWER_LAYER_LIMIT)
       newLayer = DEFAULT_LOWER_LAYER_LIMIT;
 
-    this.currentLayer =newLayer;
+    this.currentLayer = newLayer;
   }
 
   setMapHeight(height) {

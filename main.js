@@ -7,7 +7,7 @@ import './tileElement.js';
 
 document.addEventListener("DOMContentLoaded", function () {
   Scenario.getInstance().setCurrentTool(Tools.getInstance().noopTool);
-
+  let renderer = document.querySelector("x-renderer");
   let saveButton = document.querySelector("button#save");
   let loadButton = document.querySelector("button#load");
 
@@ -44,18 +44,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let layerUpButton = document.querySelector(`button#layer_up`);
   let layerDownButton = document.querySelector(`button#layer_down`);
-
+  let layerView = document.querySelector(`span[name="current_layer"]`);
+  let layerOnlyButton = document.querySelector(`button#toggle_only_layer`);
+  layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
+  layerOnlyButton.addEventListener('click', function() {
+    renderer.toggleRenderOnlyCurrentLayer();
+  });
   layerUpButton.addEventListener('click', function () {
     Scenario.getInstance().incrementLayer();
+    layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
+    renderer.lazyRender();
   });
 
   layerDownButton.addEventListener('click', function () {
     Scenario.getInstance().decrementLayer();
+    layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
+    renderer.lazyRender();
   });
 
   let scenarioWidthInput = document.querySelector(`input#scenario_width`);
   let scenarioHeightInput = document.querySelector(`input#scenario_height`);
-  let renderer = document.querySelector("x-renderer");
 
   window.addEventListener('resize', function () {
     renderer.lazyRender();
