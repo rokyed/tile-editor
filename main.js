@@ -42,6 +42,16 @@ document.addEventListener("DOMContentLoaded", function () {
     fileInput.click();
   });
 
+  let layerUpButton = document.querySelector(`button#layer_up`);
+  let layerDownButton = document.querySelector(`button#layer_down`);
+
+  layerUpButton.addEventListener('click', function () {
+    Scenario.getInstance().incrementLayer();
+  });
+
+  layerDownButton.addEventListener('click', function () {
+    Scenario.getInstance().decrementLayer();
+  });
 
   let scenarioWidthInput = document.querySelector(`input#scenario_width`);
   let scenarioHeightInput = document.querySelector(`input#scenario_height`);

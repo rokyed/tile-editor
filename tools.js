@@ -13,17 +13,15 @@ export class Tools {
   currentBrush = null;
   noopTool() { };
 
-  paintTool(cell) {
-    cell.setTile(Tools.getInstance().currentBrush);
+  eraseTool() {
+    cell.setTile(null, layer);
   }
 
-  eraseTool(cell){
-    let blankTile = Scenario.getInstance().getPalette()[0];
-
-    cell.setTile(blankTile);
+  paintTool(cell, layer) {
+    cell.setTile(Tools.getInstance().currentBrush, layer);
   }
 
-  fillTool(cell) {
+  fillTool(cell, layer) {
     const currentTile = cell.getTile();
     let cells = new Set();
     cell.getAdjacentCellsWhere(cells, (adjacent, arr) => {
@@ -32,7 +30,7 @@ export class Tools {
 
 
     cells.forEach((cell) => {
-      cell.setTile(Tools.getInstance().currentBrush);
+      cell.setTile(Tools.getInstance().currentBrush, layer);
     });
   }
 }

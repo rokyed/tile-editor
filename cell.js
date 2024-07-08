@@ -10,35 +10,50 @@ const POSSIBLE_DIRECTIONS = ['left', 'right', 'top', 'bottom'];
 
 export class Cell {
   static deserialize(data, tileset) {
-    const cell = new Cell(data.x, data.y, data.layer);
-    cell.setTile(tileset[data.tile]);
+    const cell = new Cell(data.x, data.y);
+    const tiles = data.tiles;
+
+    for (let k in tiles) {
+      cell.setTile(tileset[tiles[k]]);
+    }
+
     cell.setCellOptions(data.options);
     return cell;
   }
 
   x = -1;
   y = -1;
-  layer = 0;
   options = {};
+  tiles = {};
   tile = null;
   adjacentTop = null;
   adjacentBottom = null;
   adjacentLeft = null;
   adjacentRight = null;
 
-  constructor(x, y, layer = 0, tile = null, cellOptions = {}) {
+  constructor(x, y, tile = null, cellOptions = {}) {
     this.x = x;
     this.y = y;
-    this.tile = tile;
+    this.tiles[0] = tile;
     this.options = { ...this.options,... cellOptions };
   }
 
-  setTile(tile) {
-    this.tile = tile;
+  setTiles(tiles = {}) {
+    for (let k in tiles) {
+      this.setTile(tiles[k], k);
+    }
   }
 
-  getTile() {
-    return this.tile;
+  getTiles() {
+    return this.tiles;
+  }
+
+  setTile(tile, layer = 0) {
+    this.tiles[layer] = tile; 
+  }
+
+  getTile(layer = 0) {
+    return this.tiles[layer];
   }
 
   setCellOptions(options) {
@@ -126,12 +141,19 @@ export class Cell {
   }
 
   serialize() {
+    let tiles = this.getTiles();
+    let tileRefs = {};
+
+    for (let k in tiles) {
+      tileRefs[k] = tiles?.[k]?.getIndex();
+    }
+
     return {
       x: this.x,
       y: this.y,
       layer: this.layer,
       options: this.options,
-      tile: this.tile?.getIndex()
+      tiles: tileRefs 
     };
   }
 

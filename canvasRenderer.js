@@ -144,20 +144,24 @@ export class XCanvasRenderer extends HTMLElement {
     cells.forEach((cell) => {
       const x = centerX + (cell.x - this.x) * this.cellSize;
       const y = centerY + (cell.y - this.y) * this.cellSize;
-      const tile = cell.getTile();
-      if (tile) {
-        const image = this.getImageFromCache(tile.getImage());
-        if (image) {
-          this.ctx.imageSmoothingEnabled = false;
-          this.ctx.drawImage(image, x, y, this.cellSize, this.cellSize);
-        }
-      }
+      let tiles = cell.getTiles();
 
-      if (this.renderStats) {
-        this.ctx.fillStyle = '#FFF';
-        this.ctx.fillText(`(${cell.x}, ${cell.y})`, x, y + this.cellSize);
-        this.ctx.strokeStyle = tile?.getColor() ?? '#d33';
-        this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
+      for (let k in tiles) {
+        const tile = tiles[k];
+        if (tile) {
+          const image = this.getImageFromCache(tile.getImage());
+          if (image) {
+            this.ctx.imageSmoothingEnabled = false;
+            this.ctx.drawImage(image, x, y, this.cellSize, this.cellSize);
+          }
+        }
+
+        if (this.renderStats) {
+          this.ctx.fillStyle = '#FFF';
+          this.ctx.fillText(`(${cell.x}, ${cell.y})`, x, y + this.cellSize);
+          this.ctx.strokeStyle = tile?.getColor() ?? '#d33';
+          this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
+        }
       }
     });
   }
