@@ -1,7 +1,7 @@
 import { Scenario } from "./scenario.js";
 const DEFAULT_CELL_SIZE = 32;
-const DEFAULT_CELL_MAX_ZOOM = 256;
-const DEFAULT_CELL_MIN_ZOOM = 16;
+const DEFAULT_CELL_MAX_ZOOM = 128;
+const DEFAULT_CELL_MIN_ZOOM = 8;
 const OVERSPILL = 2;
 
 export class XCanvasRenderer extends HTMLElement {
@@ -52,8 +52,19 @@ export class XCanvasRenderer extends HTMLElement {
 
   onScroll(event) {
     console.log('scroll', event);
-    this.xPixel += event.deltaX / this.cellSize;
-    this.yPixel += event.deltaY / this.cellSize;
+    let dx = 0;
+    let dy = 0;
+
+    if (event.shiftKey) {
+      dx = event.deltaY;
+      dy = event.deltaX;
+    } else {
+      dx = event.deltaX;
+      dy = event.deltaY;
+    }
+
+    this.xPixel += dx / this.cellSize;
+    this.yPixel += dy / this.cellSize;
 
     this.x = Math.floor(this.xPixel);
     this.y = Math.floor(this.yPixel);
