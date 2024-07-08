@@ -61,21 +61,26 @@ export class XCanvasRenderer extends HTMLElement {
 
     if (this.x < 0) {
       this.x = 0;
+      this.xPixel = this.x;
     }
 
     if (this.y < 0) {
       this.y = 0;
+      this.yPixel = this.y;
     }
 
     const scenario = Scenario.getInstance();
 
     if (this.x > scenario.getMapWidth() - 1) {
       this.x = Scenario.getInstance().getMapWidth() - 1;
+      this.xPixel = this.x;
     }
 
     if (this.y > Scenario.getInstance().getMapHeight() - 1) {
       this.y = Scenario.getInstance().getMapWidth() - 1;
+      this.yPixel = this.y;
     }
+
 
     this.render();
   }
@@ -112,7 +117,7 @@ export class XCanvasRenderer extends HTMLElement {
 
   render() {
     let rect = this.getBoundingClientRect();
-    this.spread = Math.floor((Math.max(rect.width, rect.height) / this.cellSize) / 4) + OVERSPILL;
+    this.spread = Math.floor((Math.max(rect.width, rect.height) / this.cellSize) / 2) + OVERSPILL;
     this.canvas.width = rect.width;
     this.canvas.height = rect.height;
     this.canvas.style.width = '100%';

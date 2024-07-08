@@ -1,5 +1,6 @@
 import { Cell } from './cell.js';
 import { Tile } from './tile.js';
+import { defaultImage, defaultImageWidth, defaultImageHeight } from './staticData.js';
 
 export class Scenario {
 
@@ -79,7 +80,7 @@ export class Scenario {
 
   newScenario(width, height) {
     this.palette = [];
-    this.pushImageIntoPalette(null, 1, 1);
+    this.pushImageIntoPalette(defaultImage, defaultImageWidth, defaultImageHeight);
     this.setMapSize(width, height);
     this.fireUpdate();
   }
