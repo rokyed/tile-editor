@@ -53,6 +53,11 @@ export class XPalette extends HTMLElement {
         return element.classList && element.classList.contains("tile");
       });
       let tileIndex = tile.getAttribute("data-tile-index");
+      let noTile = tile.getAttribute("data-no-tile");
+
+      if (noTile) {
+        Tools.getInstance().currentBrush = null;
+      }
 
       if (!tileIndex) {
         return;
@@ -72,15 +77,20 @@ export class XPalette extends HTMLElement {
   renderTile(tile) {
     let tileElement = document.createElement("x-tile-element");
     tileElement.classList.add("tile");
-    tileElement.setAttribute("data-tile-index", tile.getIndex());
-    tileElement.setAttribute("image", tile.getImage());
+    if (tile) {
+      tileElement.setAttribute("data-tile-index", tile.getIndex());
+      tileElement.setAttribute("image", tile.getImage());
+    } else {
+      tileElement.setAttribute('data-no-tile', true);
+    }
     this.container.appendChild(tileElement);
   }
+
   render() {
     this.clearAll();
     const scenario = Scenario.getInstance();
     const tiles = scenario.getPalette();
-
+    this.renderTile(null);
     tiles.forEach(tile => {
       this.renderTile(tile);
     });

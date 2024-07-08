@@ -1,4 +1,5 @@
 import { Scenario } from "./scenario.js";
+import { defaultImage } from './staticData.js';
 const DEFAULT_CELL_SIZE = 32;
 const DEFAULT_CELL_MAX_ZOOM = 128;
 const DEFAULT_CELL_MIN_ZOOM = 2;
@@ -37,7 +38,7 @@ export class XCanvasRenderer extends HTMLElement {
       if (event?.detail?.force) {
         this.resetViewport();
       } else {
-        this.render();
+        this.rafRender();
       }
     });
 
@@ -114,7 +115,7 @@ export class XCanvasRenderer extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    this.render();
+    this.rafRender();
   }
 
   getTileXYFromClickXY(x, y) {
@@ -140,11 +141,15 @@ export class XCanvasRenderer extends HTMLElement {
 
     const scenario = Scenario.getInstance();
     const cells = scenario.getCellsZone(this.x, this.y, this.spread);
-
     cells.forEach((cell) => {
       const x = centerX + (cell.x - this.x) * this.cellSize;
       const y = centerY + (cell.y - this.y) * this.cellSize;
       let tiles = cell.getTiles();
+      const bg = this.getImageFromCache(defaultImage);
+      if (bg) {
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.drawImage(bg, x, y, this.cellSize, this.cellSize);
+      }
 
       for (let k in tiles) {
         const tile = tiles[k];
@@ -154,14 +159,13 @@ export class XCanvasRenderer extends HTMLElement {
             this.ctx.imageSmoothingEnabled = false;
             this.ctx.drawImage(image, x, y, this.cellSize, this.cellSize);
           }
-        }
-
-        if (this.renderStats) {
-          this.ctx.fillStyle = '#FFF';
-          this.ctx.fillText(`(${cell.x}, ${cell.y})`, x, y + this.cellSize);
-          this.ctx.strokeStyle = tile?.getColor() ?? '#d33';
-          this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
-        }
+        } 
+      }
+      if (this.renderStats) {
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.fillText(`(${cell.x}, ${cell.y})`, x, y + this.cellSize);
+        this.ctx.strokeStyle = '#d33';
+        this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
       }
     });
   }
@@ -173,7 +177,7 @@ export class XCanvasRenderer extends HTMLElement {
       this.cellSize = DEFAULT_CELL_MAX_ZOOM;
     }
 
-    this.render();
+    this.rafRender();
   }
 
   zoomOut() {
@@ -183,7 +187,7 @@ export class XCanvasRenderer extends HTMLElement {
       this.cellSize = DEFAULT_CELL_MIN_ZOOM;
     }
 
-    this.render();
+    this.rafRender();
   }
 
 
@@ -192,21 +196,27 @@ export class XCanvasRenderer extends HTMLElement {
     this.y = Math.floor(Scenario.getInstance().getMapHeight() / 2);
     this.xPixel = this.x;
     this.yPixel = this.y;
-    this.render();
+    this.rafRender();
   }
 
   zoomReset() {
     this.cellSize = DEFAULT_CELL_SIZE;
-    this.render();
+    this.rafRender();
   }
 
   toggleStats() {
     this.renderStats = !this.renderStats;
-    this.render();
+    this.rafRender();
   }
 
   lazyRender() {
-    this.render();
+    this.rafRender();
+  }
+
+  rafRender() {
+    requestAnimationFrame(() => {
+      this.render();
+    });
   }
 
 
@@ -228,7 +238,7 @@ export class XCanvasRenderer extends HTMLElement {
       image.onload = (event) => {
         this.imageCache[url] = event.target;
         this.imageCache[`BUSY_${url}`] = false;
-        this.render();
+        this.rafRender();
       }
       this.imageRenderer.appendChild(image);
     }, 0);

@@ -22,10 +22,10 @@ export class Tools {
   }
 
   fillTool(cell, layer) {
-    const currentTile = cell.getTile();
+    const currentTile = cell.getTile(layer);
     let cells = new Set();
     cell.getAdjacentCellsWhere(cells, (adjacent, arr) => {
-      return adjacent.getTile() === currentTile;
+      return adjacent.getTile(layer) === currentTile;
     });
 
 

@@ -89,7 +89,7 @@ export class Scenario {
     this.palette = [];
     this.layerCount = 1;
     this.currentLayer = 0;
-    this.pushImageIntoPalette(defaultImage, defaultImageWidth, defaultImageHeight);
+    //this.pushImageIntoPalette(defaultImage, defaultImageWidth, defaultImageHeight);
     this.setMapSize(width, height);
     this.fireUpdate();
   }
@@ -106,10 +106,9 @@ export class Scenario {
 
   populate() {
     this.mapCells = [];
-    let defaultTile = this.palette[0];
     for (let y = 0; y < this.mapSize[1]; y++) {
       for (let x = 0; x < this.mapSize[0]; x++) {
-        this.mapCells.push(new Cell(x, y, defaultTile));
+        this.mapCells.push(new Cell(x, y));
       }
     }
 
