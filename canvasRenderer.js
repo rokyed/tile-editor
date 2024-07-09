@@ -98,6 +98,9 @@ export class XCanvasRenderer extends HTMLElement {
   }
 
   startOnTileInteract(event) {
+    if (event.button !== 0)
+      return;
+
     this.isInteracting = true;
     this.onTileInteract(event);
   }

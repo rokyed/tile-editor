@@ -4,6 +4,7 @@ import { Tools } from "./tools.js";
 import './canvasRenderer.js';
 import './palette.js';
 import './tileElement.js';
+import { ContextWheel } from './contextWheel.js';
 
 document.addEventListener("DOMContentLoaded", function () {
   Scenario.getInstance().setCurrentTool(Tools.getInstance().noopTool);
@@ -47,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let layerView = document.querySelector(`span[name="current_layer"]`);
   let layerOnlyButton = document.querySelector(`button#toggle_only_layer`);
   layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
-  layerOnlyButton.addEventListener('click', function() {
+  layerOnlyButton.addEventListener('click', function () {
     renderer.toggleRenderOnlyCurrentLayer();
   });
   layerUpButton.addEventListener('click', function () {
@@ -219,5 +220,87 @@ document.addEventListener("DOMContentLoaded", function () {
 
   window.addEventListener("brush.change", function (e) {
     document.querySelector('[name="brush_preview"]').setAttribute('image', e.detail.getImage());
+  });
+
+  let body = document.querySelector("body");
+
+  body.addEventListener("contextmenu", function (event) {
+    event.preventDefault();
+    ContextWheel.Show(event.clientX, event.clientY, [
+      {
+        name: "Paint",
+        action: function () {
+          const scenario = Scenario.getInstance();
+          const tools = Tools.getInstance();
+          scenario.setCurrentTool(tools.paintTool);
+          visuallySelectBrush(brushSingleButton);
+        }
+      },
+      {
+        name: "Fill",
+        action: function () {
+          const scenario = Scenario.getInstance();
+          const tools = Tools.getInstance();
+          scenario.setCurrentTool(tools.fillTool);
+          visuallySelectBrush(brushFillButton);
+        }
+      },
+      {
+        name: "No tool",
+        action: function () {
+          const scenario = Scenario.getInstance();
+          const tools = Tools.getInstance();
+          scenario.setCurrentTool(tools.noopTool);
+          visuallySelectBrush(brushNone);
+        }
+      },
+      {
+        name: "Layer Up",
+        action: function () {
+          Scenario.getInstance().incrementLayer();
+          layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
+          renderer.lazyRender();
+        }
+      },
+      {
+        name: "Layer Down",
+        action: function () {
+          Scenario.getInstance().decrementLayer();
+          layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
+          renderer.lazyRender();
+        }
+      },
+      {
+        name: "Only Layer",
+        action: function () {
+          renderer.toggleRenderOnlyCurrentLayer();
+        }
+      },
+      {
+        name: "Toggle Stats",
+        action: function () {
+          renderer.toggleStats();
+        }
+      },
+      {
+        name: "Zoom In",
+        action: function () {
+          renderer.zoomIn();
+        }
+      },
+      {
+        name: "Zoom Out",
+        action: function () {
+          renderer.zoomOut();
+
+        }
+      },
+      {
+        name: "Zoom Reset",
+        action: function () {
+          renderer.zoomReset();
+        }
+      }
+    ]);
   });
 });
