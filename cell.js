@@ -14,7 +14,7 @@ export class Cell {
     const tiles = data.tiles;
 
     for (let k in tiles) {
-      cell.setTile(tileset[tiles[k]]);
+      cell.setTile(tileset[tiles[k]], k);
     }
 
     cell.setCellOptions(data.options);
@@ -49,7 +49,7 @@ export class Cell {
   }
 
   setTile(tile, layer = 0) {
-    this.tiles[layer] = tile; 
+    this.tiles[layer] = tile;
   }
 
   getTile(layer = 0) {
@@ -153,7 +153,7 @@ export class Cell {
       y: this.y,
       layer: this.layer,
       options: this.options,
-      tiles: tileRefs 
+      tiles: tileRefs
     };
   }
 

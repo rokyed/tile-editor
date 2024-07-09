@@ -2,12 +2,13 @@ import { Cell } from './cell.js';
 import { Tile } from './tile.js';
 import { defaultImage, defaultImageWidth, defaultImageHeight } from './staticData.js';
 
-const DEFAULT_UPPER_LAYER_LIMIT = 32;
-const DEFAULT_LOWER_LAYER_LIMIT = 0;
 
 export class Scenario {
 
   static instance = null;
+
+static DEFAULT_LOWER_LAYER_LIMIT = 0;
+static DEFAULT_UPPER_LAYER_LIMIT = 32;
 
   static getInstance() {
     if (!Scenario.instance) {
@@ -33,7 +34,7 @@ export class Scenario {
 
   currentTool = () => { };
   layerCount = 1;
-  currentLayer = DEFAULT_LOWER_LAYER_LIMIT;
+  currentLayer = Scenario.DEFAULT_LOWER_LAYER_LIMIT;
   mapSize = [0, 0];
   mapCells = [];
   palette = [];
@@ -67,7 +68,6 @@ export class Scenario {
   }
 
   executeTool(x, y) {
-    console.log(x, y);
     if (x < 0 || x >= this.mapSize[0] || y < 0 || y >= this.mapSize[1]) {
       return;
     }
@@ -133,17 +133,17 @@ export class Scenario {
   incrementLayer() {
     let newLayer = this.currentLayer + 1;
 
-    if (newLayer > DEFAULT_UPPER_LAYER_LIMIT - 1)
-      newLayer = DEFAULT_UPPER_LAYER_LIMIT - 1; 
+    if (newLayer > Scenario.DEFAULT_UPPER_LAYER_LIMIT - 1)
+      newLayer = Scenario.DEFAULT_UPPER_LAYER_LIMIT - 1;
 
     this.currentLayer = newLayer;
   }
 
   decrementLayer() {
-    let newLayer = this.currentLayer - 1; 
+    let newLayer = this.currentLayer - 1;
 
-    if (newLayer < DEFAULT_LOWER_LAYER_LIMIT)
-      newLayer = DEFAULT_LOWER_LAYER_LIMIT;
+    if (newLayer < Scenario.DEFAULT_LOWER_LAYER_LIMIT)
+      newLayer = Scenario.DEFAULT_LOWER_LAYER_LIMIT;
 
     this.currentLayer = newLayer;
   }

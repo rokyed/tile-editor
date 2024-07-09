@@ -53,7 +53,6 @@ export class XCanvasRenderer extends HTMLElement {
   }
 
   onScroll(event) {
-    console.log('scroll', event);
     let dx = 0;
     let dy = 0;
 
@@ -128,7 +127,84 @@ export class XCanvasRenderer extends HTMLElement {
     return { x: cellX, y: cellY };
   }
 
+  prepareBackground(batches) {
+    let batch = [];
+    let minX = Math.max(this.x - this.spread, 0);
+    let minY = Math.max(this.y - this.spread, 0);
+    let maxX = Math.min(this.x + this.spread, Scenario.getInstance().getMapWidth());
+    let maxY = Math.min(this.y + this.spread, Scenario.getInstance().getMapHeight());
+
+    for (let x = minX; x < maxX; x++) {
+      for (let y = minY; y < maxY; y++) {
+        let image = this.getImageFromCache(defaultImage);
+        if (image) {
+          batch.push({
+            x: x,
+            y: y,
+            image: image
+          });
+        }
+      }
+    }
+
+    batches.push(batch);
+  }
+
+  prepareStats(batches, cells) {
+    if (!this.renderStats)
+      return;
+
+    let batch = [];
+
+    let minX = this.x - this.spread;
+    let minY = this.y - this.spread;
+    let maxX = this.x + this.spread;
+    let maxY = this.y + this.spread;
+
+
+    for (let x = minX; x < maxX; x++) {
+      for (let y = minY; y < maxY; y++) {
+        batch.push({
+          x: x,
+          y: y,
+          stats: `(${x}, ${y})`
+        });
+      }
+    }
+
+    batches.push(batch);
+  }
+
+  prepareRenderingLayers(batches, cells) {
+    let min = Scenario.DEFAULT_LOWER_LAYER_LIMIT;
+    let max = Scenario.DEFAULT_UPPER_LAYER_LIMIT;
+    if (this.renderCurrentLayerOnly) {
+      min = Scenario.getInstance().currentLayer;
+      max = min + 1;
+    }
+    for (let i = min; i < max; i++) {
+      let batch = [];
+      for (let c = 0; c < cells.length; c++) {
+        let cell = cells[c];
+        let tile = cell.getTile(i);
+        if (tile) {
+          let image = this.getImageFromCache(tile.image);
+          if (image) {
+            batch.push({
+              x: cell.x,
+              y: cell.y,
+              image: image
+            });
+          }
+        }
+      }
+      batches.push(batch);
+    }
+  }
+
+
   render() {
+    let renderingBatches = [];
     let rect = this.getBoundingClientRect();
     this.spread = Math.floor((Math.max(rect.width, rect.height) / this.cellSize) / 2) + OVERSPILL;
     this.canvas.width = rect.width;
@@ -142,48 +218,27 @@ export class XCanvasRenderer extends HTMLElement {
 
     const scenario = Scenario.getInstance();
     const cells = scenario.getCellsZone(this.x, this.y, this.spread);
-    cells.forEach((cell) => {
-      const x = centerX + (cell.x - this.x) * this.cellSize;
-      const y = centerY + (cell.y - this.y) * this.cellSize;
-      let tiles = cell.getTiles();
-      const bg = this.getImageFromCache(defaultImage);
-      if (bg) {
-        this.ctx.imageSmoothingEnabled = false;
-        this.ctx.drawImage(bg, x, y, this.cellSize, this.cellSize);
-      }
-      if (this.renderStats) {
-        this.ctx.strokeStyle = '#ddd';
-        this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
-      }
+    this.prepareBackground(renderingBatches);
+    this.prepareRenderingLayers(renderingBatches, cells);
+    this.prepareStats(renderingBatches);
 
-      if (this.renderCurrentLayerOnly) {
-        const tile = tiles[scenario.currentLayer];
-        if (tile) {
-          const image = this.getImageFromCache(tile.getImage());
-          if (image) {
-            this.ctx.imageSmoothingEnabled = false;
-            this.ctx.drawImage(image, x, y, this.cellSize, this.cellSize);
-          }
-        }
-      } else {
-        for (let k in tiles) {
-          const tile = tiles[k];
-          if (tile) {
-            const image = this.getImageFromCache(tile.getImage());
-            if (image) {
-              this.ctx.imageSmoothingEnabled = false;
-              this.ctx.drawImage(image, x, y, this.cellSize, this.cellSize);
-            }
-          } 
+    for (let b = 0; b < renderingBatches.length; b++) {
+      const batch = renderingBatches[b];
+      for (let i = 0; i < batch.length; i++) {
+        const item = batch[i];
+        const x = centerX + (item.x - this.x) * this.cellSize;
+        const y = centerY + (item.y - this.y) * this.cellSize;
+        if (item.image) {
+          this.ctx.imageSmoothingEnabled = false;
+          this.ctx.drawImage(item.image, x, y, this.cellSize, this.cellSize);
+        } else if (item.stats) {
+          this.ctx.fillStyle = '#FFF';
+          this.ctx.fillText(item.stats, x+ this.cellSize/2, y + this.cellSize/2);
+          this.ctx.strokeStyle = '#FFF';
+          this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
         }
       }
-
-
-      if (this.renderStats) {
-        this.ctx.fillStyle = '#FFF';
-        this.ctx.fillText(`(${cell.x}, ${cell.y})`, x, y + this.cellSize);
-      }
-    });
+    }
   }
 
   zoomIn() {
@@ -249,8 +304,6 @@ export class XCanvasRenderer extends HTMLElement {
     if (this.imageCache[url]) {
       return this.imageCache[url];
     }
-
-    console.log('no cache, preparing cache');
 
     this.imageCache[`BUSY_${url}`] = true;
     setTimeout(() => {
