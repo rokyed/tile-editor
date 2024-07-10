@@ -1,0 +1,1 @@
+Feel free to add any features, fix bugs and such. I will review the code anyways. If I see anything that I would do differently, I will mention it. But no worries :) I'm looking forward for your contribution.
