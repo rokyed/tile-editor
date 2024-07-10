@@ -6,6 +6,10 @@ import './palette.js';
 import './tileElement.js';
 import { ContextWheel } from './contextWheel.js';
 
+/*
+ * In this file all the different modules are imported, used and fused together
+ */
+
 document.addEventListener("DOMContentLoaded", function () {
   Scenario.getInstance().setCurrentTool(Tools.getInstance().noopTool);
   let renderer = document.querySelector("x-renderer");
