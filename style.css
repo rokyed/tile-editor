@@ -93,6 +93,7 @@ button {
   background:#555;
   color:#FFF;
   cursor: pointer;
+  border: 2px solid #999;
 }
 
 button:hover {
@@ -126,4 +127,18 @@ x-renderer {
 
 .brush.selected {
   background: #777;
+}
+
+.side_row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.side_row > * {
+  flex: 1 1 1px;
+  text-wrap: nowrap;
 }

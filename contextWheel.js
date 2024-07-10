@@ -2,14 +2,17 @@
 const THEME = {
   border: '#3f3',
   text: '#3d3',
+  font: '22px monospace',
+  detail: '#3f3',
+  detailFont: '12px monospace',
   deadZone: 'rgba(30,0,0,0.5)',
   background: 'rgba(0,0,0,0.5)',
-  highlight: 'rgba(255,255,255,0.5)',
+  highlight: 'rgba(30,255,30,0.2)',
 }
 const SIZES = {
-  radius: 125,
-  deadZone: 50,
-  diameter: 250,
+  radius: 140,
+  deadZone: 60,
+  diameter: 280,
 }
 
 export class ContextWheel extends HTMLElement {
@@ -88,8 +91,8 @@ export class ContextWheel extends HTMLElement {
       degrees += 360;
     }
 
-    let slice = Math.floor(degrees / (360 / this.options.length));
-
+    let sliceFraction = degrees/(360 / this.options.length);
+    let slice = Math.floor(sliceFraction);
     return slice;
   }
 
@@ -134,7 +137,7 @@ export class ContextWheel extends HTMLElement {
 
   renderCanvas(pointerX, pointerY) {
     let ctx = this.ctx;
-    let center = SIZES.diameter / 2;
+    let center = (SIZES.diameter / 2) + 1;
 
     ctx.clearRect(0, 0, SIZES.diameter, SIZES.diameter);
     ctx.fillStyle = THEME.background;
@@ -167,11 +170,12 @@ export class ContextWheel extends HTMLElement {
     }
 
     ctx.stroke();
-
+    let highlightingSlice = null;
     //draw highlight
     if (pointerX && pointerY) {
       if (!this.isPointInCenter({ offsetX: pointerX, offsetY: pointerY })) {
         let slice = this.calculatePieSlice({ offsetX: pointerX, offsetY: pointerY });
+        highlightingSlice = slice;
         let angle = (slice / this.options.length) * Math.PI * 2;
         let sliceAngle = (1 / this.options.length) * Math.PI * 2;
         let x = center + Math.cos(angle) * SIZES.radius;
@@ -201,7 +205,7 @@ export class ContextWheel extends HTMLElement {
 
     ctx.fillStyle = THEME.text;
     ctx.fontWeight = 'bold';
-    ctx.font = '12px sans-serif';
+    ctx.font = THEME.font;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
@@ -213,6 +217,12 @@ export class ContextWheel extends HTMLElement {
       let x = center + Math.cos(angle + (slice * 0.5)) * textMidPoint;
       let y = center + Math.sin(angle + (slice * 0.5)) * textMidPoint;
       ctx.fillText(this.options[i].name, x, y);
+    }
+
+    if (highlightingSlice !== null) {
+      ctx.fillStyle = THEME.detail;
+      ctx.font = THEME.detailFont;
+      ctx.fillText(this.options[highlightingSlice].detail, center, center);
     }
   }
 
@@ -228,9 +238,11 @@ export class ContextWheel extends HTMLElement {
           z-index: 999;
           transform: translate(-50%, -50%);
           border-radius: 50%;
-          width: ${SIZES.diameter}px;
-          height: ${SIZES.diameter}px;
+          width: ${SIZES.diameter+2}px;
+          height: ${SIZES.diameter+2}px;
           cursor:pointer;
+          overflow: hidden;
+          box-shadow: 0 0 100px rgba(0, 0, 0, 1);
         }
         .option {
           padding: 5px;
@@ -238,7 +250,7 @@ export class ContextWheel extends HTMLElement {
         }
         </style>
 
-        <canvas width="${SIZES.diameter}" height="${SIZES.diameter}"></canvas>
+        <canvas width="${SIZES.diameter+2}" height="${SIZES.diameter+2}"></canvas>
         `;
   }
 }

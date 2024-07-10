@@ -67,26 +67,8 @@ document.addEventListener("DOMContentLoaded", function () {
     renderer.lazyRender();
   });
 
-  let scenarioWidthInput = document.querySelector(`input#scenario_width`);
-  let scenarioHeightInput = document.querySelector(`input#scenario_height`);
-
   window.addEventListener('resize', function () {
     renderer.lazyRender();
-  });
-
-  scenarioWidthInput.value = Scenario.getInstance().getMapWidth();
-  scenarioHeightInput.value = Scenario.getInstance().getMapHeight();
-
-  scenarioWidthInput.addEventListener("change", function () {
-    const scenario = Scenario.getInstance();
-    scenario.setMapWidth(this.value);
-    renderer.resetViewport();
-  });
-
-  scenarioHeightInput.addEventListener("change", function () {
-    const scenario = Scenario.getInstance();
-    scenario.setMapHeight(this.value);
-    renderer.resetViewport();
   });
 
   let zoomInButton = document.querySelector("button#zoom_in");
@@ -109,10 +91,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   let loadPaletteButton = document.querySelector("button#load_palette");
-  let paletteTileSizeInput = document.querySelector("input#palette_tile_size");
-
   loadPaletteButton.addEventListener("click", function () {
-    // load file then draw it on the canvas
+    let  paletteTileSize = parseInt(prompt("Enter the size of the palette tile (in pixels)", "16"));
+
+    if (isNaN(paletteTileSize)) {
+      alert("Invalid palette tile size");
+      return;
+    }
 
     let fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -130,7 +115,6 @@ document.addEventListener("DOMContentLoaded", function () {
       reader.onload = function (e) {
         let img = new Image();
         img.onload = function () {
-          let paletteTileSize = parseInt(paletteTileSizeInput.value);
           let canvas = document.createElement("canvas");
 
           canvas.width = img.width;
@@ -215,11 +199,24 @@ document.addEventListener("DOMContentLoaded", function () {
   let newScenarioButton = document.querySelector("button#new_scenario");
 
   newScenarioButton.addEventListener("click", function () {
-    let scenarioWidth = parseInt(scenarioWidthInput.value);
-    let scenarioHeight = parseInt(scenarioHeightInput.value);
+    let confirm = window.confirm("Are you sure you want to create a new scenario?");
+
+    if (!confirm) {
+      return;
+    }
+
+    let scenarioWidth = parseInt(prompt("Enter the width of the scenario", "32"));
+    let scenarioHeight = parseInt(prompt("Enter the height of the scenario", "32"));
+
+    if (isNaN(scenarioWidth) || isNaN(scenarioHeight)) {
+      alert("Invalid scenario dimensions");
+      return;
+    }
 
     let scenario = Scenario.getInstance();
     scenario.newScenario(scenarioWidth, scenarioHeight);
+    renderer.lazyRender();
+    renderer.resetViewport();
   });
 
   window.addEventListener("brush.change", function (e) {
@@ -241,7 +238,8 @@ document.addEventListener("DOMContentLoaded", function () {
     event.preventDefault();
     ContextWheel.Show(event.clientX, event.clientY, [
       {
-        name: "Paint",
+        name: "🖌️",
+        detail: "Paint tool",
         action: function () {
           const scenario = Scenario.getInstance();
           const tools = Tools.getInstance();
@@ -250,7 +248,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       },
       {
-        name: "Fill",
+        name: "🪣",
+        detail: "Fill tool",
         action: function () {
           const scenario = Scenario.getInstance();
           const tools = Tools.getInstance();
@@ -259,7 +258,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       },
       {
-        name: "No tool",
+        name: "🚫",
+        detail: "No tool",
         action: function () {
           const scenario = Scenario.getInstance();
           const tools = Tools.getInstance();
@@ -268,15 +268,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       },
       {
-        name: "Layer Up",
-        action: function () {
-          Scenario.getInstance().incrementLayer();
-          layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
-          renderer.lazyRender();
-        }
-      },
-      {
-        name: "Layer Down",
+        name: "📥",
+        detail: "Layer Down",
         action: function () {
           Scenario.getInstance().decrementLayer();
           layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
@@ -284,32 +277,48 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       },
       {
-        name: "Only Layer",
+        name: "👁️",
+        detail: "See Layer Only",
         action: function () {
           renderer.toggleRenderOnlyCurrentLayer();
         }
       },
+
       {
-        name: "Toggle Stats",
+        name: "📤",
+        detail: "Layer Up",
+        action: function () {
+          Scenario.getInstance().incrementLayer();
+          layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
+          renderer.lazyRender();
+        }
+      },
+
+      {
+        name: "🕵️‍♂️",
+        detail: "See Stats",
         action: function () {
           renderer.toggleStats();
         }
       },
       {
-        name: "Zoom In",
+        name: "🔎+",
+        detail: "Zoom In",
         action: function () {
           renderer.zoomIn();
         }
       },
       {
-        name: "Zoom Out",
+        name: "🔎-",
+        detail: "Zoom Out",
         action: function () {
           renderer.zoomOut();
 
         }
       },
       {
-        name: "Zoom Reset",
+        name: "🔎↺",
+        detail: "Reset Zoom",
         action: function () {
           renderer.zoomReset();
         }

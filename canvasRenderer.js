@@ -235,6 +235,9 @@ export class XCanvasRenderer extends HTMLElement {
           this.ctx.imageSmoothingEnabled = false;
           this.ctx.drawImage(item.image, x, y, this.cellSize, this.cellSize);
         } else if (item.stats) {
+          this.ctx.font = '12px monospace';
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
           this.ctx.fillStyle = '#FFF';
           this.ctx.fillText(item.stats, x+ this.cellSize/2, y + this.cellSize/2);
           this.ctx.strokeStyle = '#FFF';
