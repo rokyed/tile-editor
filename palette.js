@@ -1,5 +1,6 @@
 import { Scenario } from "./scenario.js";
 import { Tools } from "./tools.js";
+import { TileElement } from "./tileElement.js";
 
 export class XPalette extends HTMLElement {
   container = null;
@@ -50,13 +51,19 @@ export class XPalette extends HTMLElement {
 
     this.addEventListener("click", (event) => {
       const tile = event.composedPath().find((element) => {
-        return element.classList && element.classList.contains("tile");
+        return element instanceof TileElement;
       });
+
+      if (!tile) {
+        return;
+      }
       let tileIndex = tile.getAttribute("data-tile-index");
       let noTile = tile.getAttribute("data-no-tile");
 
       if (noTile) {
         Tools.getInstance().currentBrush = null;
+        window.dispatchEvent(new CustomEvent("brush.change", { detail: null}));
+        return;
       }
 
       if (!tileIndex) {
@@ -82,6 +89,7 @@ export class XPalette extends HTMLElement {
       tileElement.setAttribute("image", tile.getImage());
     } else {
       tileElement.setAttribute('data-no-tile', true);
+      tileElement.removeAttribute("image");
     }
     this.container.appendChild(tileElement);
   }

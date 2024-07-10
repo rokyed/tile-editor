@@ -1,4 +1,17 @@
 
+const THEME = {
+  border: '#3f3',
+  text: '#3d3',
+  deadZone: 'rgba(30,0,0,0.5)',
+  background: 'rgba(0,0,0,0.5)',
+  highlight: 'rgba(255,255,255,0.5)',
+}
+const SIZES = {
+  radius: 125,
+  deadZone: 50,
+  diameter: 250,
+}
+
 export class ContextWheel extends HTMLElement {
   static instance = null;
 
@@ -87,7 +100,7 @@ export class ContextWheel extends HTMLElement {
     let height = this.shadowRoot.querySelector('canvas').height;
     let centerX = width / 2;
     let centerY = height / 2;
-    let radius = 50;
+    let radius = SIZES.deadZone;
 
     let distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
 
@@ -109,7 +122,6 @@ export class ContextWheel extends HTMLElement {
       let slice = this.calculatePieSlice(event);
 
       if (this.options[slice]) {
-        console.log('clicked', this.options[slice]);
         this.options[slice]?.action?.();
         this.remove();
       }
@@ -122,19 +134,20 @@ export class ContextWheel extends HTMLElement {
 
   renderCanvas(pointerX, pointerY) {
     let ctx = this.ctx;
+    let center = SIZES.diameter / 2;
 
-    ctx.clearRect(0, 0, 300, 300);
-    ctx.fillStyle = 'rgba(0,0, 0, 0.9)';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.clearRect(0, 0, SIZES.diameter, SIZES.diameter);
+    ctx.fillStyle = THEME.background;
+    ctx.strokeStyle =THEME.border;
     ctx.lineWidth = 1;
 
     ctx.beginPath();
-    ctx.arc(150, 150, 50, 0, 2 * Math.PI);
+    ctx.arc(center, center, SIZES.deadZone, 0, 2 * Math.PI);
     ctx.fill();
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.arc(150, 150, 150, 0, 2 * Math.PI);
+    ctx.arc(center, center, SIZES.radius, 0, 2 * Math.PI);
     ctx.stroke();
 
 
@@ -144,10 +157,10 @@ export class ContextWheel extends HTMLElement {
       let angle = (i / this.options.length) * Math.PI * 2;
       let slice = (1 / this.options.length) * Math.PI * 2;
 
-      let x = 150 + Math.cos(angle) * 150;
-      let y = 150 + Math.sin(angle) * 150;
-      let beginX = 150 + Math.cos(angle)* 50;
-      let beginY = 150 + Math.sin(angle) * 50;
+      let x = center + Math.cos(angle) * SIZES.radius;
+      let y = center + Math.sin(angle) * SIZES.radius;
+      let beginX = center + Math.cos(angle)* SIZES.deadZone;
+      let beginY = center + Math.sin(angle) * SIZES.deadZone;
 
       ctx.moveTo(beginX, beginY);
       ctx.lineTo(x, y);
@@ -156,40 +169,49 @@ export class ContextWheel extends HTMLElement {
     ctx.stroke();
 
     //draw highlight
-    if (pointerX && pointerY && !this.isPointInCenter({ offsetX: pointerX, offsetY: pointerY })) {
-      let slice = this.calculatePieSlice({ offsetX: pointerX, offsetY: pointerY });
-      let angle = (slice / this.options.length) * Math.PI * 2;
-      let sliceAngle = (1 / this.options.length) * Math.PI * 2;
-      let x = 150 + Math.cos(angle) * 150;
-      let y = 150 + Math.sin(angle) * 150;
-      let x2 = 150 + Math.cos(angle + sliceAngle) * 150;
-      let y2 = 150 + Math.sin(angle + sliceAngle) * 150;
-      let offsetX = 150 + Math.cos(angle) * 50;
-      let offsetY = 150 + Math.sin(angle) * 50;
-      let offsetX2 = 150 + Math.cos(angle + sliceAngle) * 50;
-      let offsetY2 = 150 + Math.sin(angle + sliceAngle) * 50;
+    if (pointerX && pointerY) {
+      if (!this.isPointInCenter({ offsetX: pointerX, offsetY: pointerY })) {
+        let slice = this.calculatePieSlice({ offsetX: pointerX, offsetY: pointerY });
+        let angle = (slice / this.options.length) * Math.PI * 2;
+        let sliceAngle = (1 / this.options.length) * Math.PI * 2;
+        let x = center + Math.cos(angle) * SIZES.radius;
+        let y = center + Math.sin(angle) * SIZES.radius;
+        let x2 = center + Math.cos(angle + sliceAngle) * SIZES.radius;
+        let y2 = center + Math.sin(angle + sliceAngle) * SIZES.radius;
+        let offsetX = center + Math.cos(angle) * SIZES.deadZone;
+        let offsetY = center + Math.sin(angle) * SIZES.deadZone;
+        let offsetX2 = center + Math.cos(angle + sliceAngle) * SIZES.deadZone;
+        let offsetY2 = center + Math.sin(angle + sliceAngle) * SIZES.deadZone;
 
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.beginPath();
-      ctx.moveTo(offsetX, offsetY);
-      ctx.lineTo(x, y);
-      ctx.arc(150, 150, 150, angle, angle + sliceAngle);
-      ctx.lineTo(offsetX2, offsetY2);
-      ctx.arc(150, 150, 50, angle + sliceAngle, angle, true);
-      ctx.fill();
+        ctx.fillStyle = THEME.highlight;
+        ctx.beginPath();
+        ctx.moveTo(offsetX, offsetY);
+        ctx.lineTo(x, y);
+        ctx.arc(center, center, SIZES.radius, angle, angle + sliceAngle);
+        ctx.lineTo(offsetX2, offsetY2);
+        ctx.arc(center, center, SIZES.deadZone, angle + sliceAngle, angle, true);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = THEME.highlight;
+        ctx.beginPath();
+        ctx.arc(center, center, SIZES.deadZone, 0, 2 * Math.PI);
+        ctx.fill();
+      }
     }
 
-    ctx.fillStyle = '#FFF';
+    ctx.fillStyle = THEME.text;
     ctx.fontWeight = 'bold';
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
+    let textMidPoint = SIZES.deadZone + ((SIZES.radius - SIZES.deadZone) / 2);
+
     for (let i = 0; i < this.options.length; i++) {
       let angle = (i / this.options.length) * Math.PI * 2;
       let slice = (1/ this.options.length) * Math.PI * 2;
-      let x = 150 + Math.cos(angle + (slice * 0.5)) * 100;
-      let y = 150 + Math.sin(angle + (slice * 0.5)) * 100;
+      let x = center + Math.cos(angle + (slice * 0.5)) * textMidPoint;
+      let y = center + Math.sin(angle + (slice * 0.5)) * textMidPoint;
       ctx.fillText(this.options[i].name, x, y);
     }
   }
@@ -206,8 +228,8 @@ export class ContextWheel extends HTMLElement {
           z-index: 999;
           transform: translate(-50%, -50%);
           border-radius: 50%;
-          width: 300px;
-          height: 300px;
+          width: ${SIZES.diameter}px;
+          height: ${SIZES.diameter}px;
           cursor:pointer;
         }
         .option {
@@ -216,7 +238,7 @@ export class ContextWheel extends HTMLElement {
         }
         </style>
 
-        <canvas width="300" height="300"></canvas>
+        <canvas width="${SIZES.diameter}" height="${SIZES.diameter}"></canvas>
         `;
   }
 }

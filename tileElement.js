@@ -1,3 +1,4 @@
+import { defaultImage } from "./staticData.js";
 
 export class TileElement extends HTMLElement {
   static get observedAttributes() {
@@ -18,16 +19,18 @@ export class TileElement extends HTMLElement {
           cursor: pointer;
           border: 1px solid #f0f;
           image-rendering: pixelated;
+          background-image: url(${defaultImage});
         }
-        
-        
+
+
       </style>
     `;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'image') {
-      this.shadowRoot.host.style.backgroundImage = `url(${newValue})`;
+      if (newValue)
+        this.shadowRoot.host.style.backgroundImage = `url(${newValue})`;
     }
 
     if (name === 'border') {
@@ -35,7 +38,8 @@ export class TileElement extends HTMLElement {
     }
 
     if (name === 'data-no-tile' && newValue) {
-      this.shadowRoot.host.style.backgroundImage = "none";
+      delete this.shadowRoot.host.style.backgroundImage;
+      this.shadowRoot.host.removeAttribute('style');
     }
   }
 }

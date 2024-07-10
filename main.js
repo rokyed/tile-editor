@@ -219,7 +219,16 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   window.addEventListener("brush.change", function (e) {
-    document.querySelector('[name="brush_preview"]').setAttribute('image', e.detail.getImage());
+    let tile = e.detail;
+    let preview = document.querySelector('[name="brush_preview"]');
+
+    if (tile) {
+      preview.setAttribute('image', tile?.getImage());
+      preview.removeAttribute('data-no-tile');
+    } else {
+      preview.setAttribute('data-no-tile', 'true');
+      preview.removeAttribute('image');
+    }
   });
 
   let body = document.querySelector("body");
