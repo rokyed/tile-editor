@@ -57,11 +57,11 @@ export class Cell {
   }
 
   setCellOptions(options) {
-    this.options = { ...this.options, ...options };
-
     for (let k in options) {
       if (options[k] === null) {
         delete this.options[k];
+      } else {
+        this.options[k] = options[k];
       }
     }
   }

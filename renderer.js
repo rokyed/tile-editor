@@ -82,7 +82,6 @@ class XRenderer extends HTMLElement {
       `;
   }
 
-
   connectedCallback() {
     this.render();
 

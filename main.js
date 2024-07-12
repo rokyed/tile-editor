@@ -16,7 +16,13 @@ document.addEventListener("DOMContentLoaded", function () {
   let renderer = document.querySelector("x-renderer");
   let saveButton = document.querySelector("button#save");
   let loadButton = document.querySelector("button#load");
+  let currentToolSpan = document.querySelector("span#current_tool");
+  let currentTileSpan = document.querySelector("span#current_tile");
   let scenarioOptionsButton = document.querySelector("button#scenario_options");
+
+  window.addEventListener("tile.interact", function (event) {
+    currentTileSpan.innerText = `${event.detail.x}, ${event.detail.y}`;
+  });
 
   scenarioOptionsButton.addEventListener("click", function () {
     const scenarioOptionsModal = document.querySelector("scenario-options-modal");
@@ -175,40 +181,6 @@ document.addEventListener("DOMContentLoaded", function () {
     fileInput.click();
   });
 
-  const brushes = document.querySelectorAll('.brush');
-  const visuallySelectBrush = (brush) => {
-    brushes.forEach((brush) => {
-      brush.classList.remove('selected');
-    });
-    brush.classList.add('selected');
-  };
-
-  const brushNone = document.querySelector('button[name="brush_none"]');
-  brushNone.addEventListener("click", function () {
-    const scenario = Scenario.getInstance();
-    const tools = Tools.getInstance();
-    scenario.setCurrentTool(tools.noopTool);
-    visuallySelectBrush(brushNone);
-  });
-
-  const brushSingleButton = document.querySelector('button[name="brush_single"]');
-
-  brushSingleButton.addEventListener("click", function () {
-    const scenario = Scenario.getInstance();
-    const tools = Tools.getInstance();
-    scenario.setCurrentTool(tools.paintTool);
-    visuallySelectBrush(brushSingleButton);
-  });
-
-  const brushFillButton = document.querySelector('button[name="brush_fill"]');
-
-  brushFillButton.addEventListener("click", function () {
-    const scenario = Scenario.getInstance();
-    const tools = Tools.getInstance();
-    scenario.setCurrentTool(tools.fillTool);
-    visuallySelectBrush(brushFillButton);
-  });
-
   let newScenarioButton = document.querySelector("button#new_scenario");
 
   newScenarioButton.addEventListener("click", function () {
@@ -253,36 +225,40 @@ document.addEventListener("DOMContentLoaded", function () {
       {
         name: "🖌️",
         detail: "Paint tool",
+        color: "rgba(255, 165, 0, 0.5)",
         action: function () {
           const scenario = Scenario.getInstance();
           const tools = Tools.getInstance();
           scenario.setCurrentTool(tools.paintTool);
-          visuallySelectBrush(brushSingleButton);
+          currentToolSpan.innerHTML = "🖌️ Paint tool";
         }
       },
       {
         name: "🪣",
         detail: "Fill tool",
+        color: "rgba(255, 165, 0, 0.5)",
         action: function () {
           const scenario = Scenario.getInstance();
           const tools = Tools.getInstance();
           scenario.setCurrentTool(tools.fillTool);
-          visuallySelectBrush(brushFillButton);
+          currentToolSpan.innerHTML = "🪣 Fill tool";
         }
       },
       {
         name: "🚫",
         detail: "No tool",
+        color: "rgba(255, 165, 0, 0.5)",
         action: function () {
           const scenario = Scenario.getInstance();
           const tools = Tools.getInstance();
           scenario.setCurrentTool(tools.noopTool);
-          visuallySelectBrush(brushNone);
+          currentToolSpan.innerHTML = "🚫 No tool";
         }
       },
       {
         name: "📥",
         detail: "Layer Down",
+        color: "rgba(255, 0, 0, 0.5)",
         action: function () {
           Scenario.getInstance().decrementLayer();
           layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
@@ -292,6 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
       {
         name: "👁️",
         detail: "See Layer Only",
+        color: "rgba(255, 0, 0, 0.5)",
         action: function () {
           renderer.toggleRenderOnlyCurrentLayer();
         }
@@ -300,6 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
       {
         name: "📤",
         detail: "Layer Up",
+        color: "rgba(255, 0, 0, 0.5)",
         action: function () {
           Scenario.getInstance().incrementLayer();
           layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
@@ -309,6 +287,7 @@ document.addEventListener("DOMContentLoaded", function () {
       {
         name: "🔎+",
         detail: "Zoom In",
+        color: "rgba(0, 255, 255, 0.5)",
         action: function () {
           renderer.zoomIn();
         }
@@ -316,6 +295,7 @@ document.addEventListener("DOMContentLoaded", function () {
       {
         name: "🔎-",
         detail: "Zoom Out",
+        color: "rgba(0, 255, 255, 0.5)",
         action: function () {
           renderer.zoomOut();
 
@@ -324,22 +304,27 @@ document.addEventListener("DOMContentLoaded", function () {
       {
         name: "🔎↺",
         detail: "Reset Zoom",
+        color: "rgba(0, 255, 255, 0.5)",
         action: function () {
           renderer.zoomReset();
         }
       },
       {
-        name: "🔧[]",
+        name: "🧹",
         detail: "Clear options",
+        color: "rgba(0, 100, 255, 0.5)",
         action: function () {
+          renderer.toggleStats(true);
           Scenario.getInstance().setCurrentTool((cell) => {
             cell.clearCellOptions();
           });
+          currentToolSpan.innerHTML = "🧹 Clear options";
         }
       },
       {
         detail: "Remove option",
         name: "🔧-",
+        color: "rgba(0, 100, 255, 0.5)",
         action: function () {
           let options = Scenario.getInstance().getOptions();
           let buttons = Scenario.getInstance().getOptions().map((option, index, arr) => {
@@ -352,8 +337,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 let opts = {};
                 opts[option] = null;
                 Scenario.getInstance().setCurrentTool((cell) => {
+                  renderer.toggleStats(true)
                   cell.setCellOptions(opts);
                 });
+                currentToolSpan.innerHTML = `🔧 Remove option (${option})`;
               }
             };
           });
@@ -363,7 +350,9 @@ document.addEventListener("DOMContentLoaded", function () {
               buttons = [{
                 name: "None",
                 detail: "Set in options",
-                action: () => { }
+                action: () => {
+                  renderer.toggleStats(true)
+                }
 
               }];
             }
@@ -376,6 +365,7 @@ document.addEventListener("DOMContentLoaded", function () {
       {
         detail: "Add option",
         name: "🔧+",
+        color: "rgba(0, 100, 255, 0.5)",
         action: function () {
           let options = Scenario.getInstance().getOptions();
           let buttons = Scenario.getInstance().getOptions().map((option, index, arr) => {
@@ -387,9 +377,11 @@ document.addEventListener("DOMContentLoaded", function () {
               action: () => {
                 let opts = {};
                 opts[option] = true;
+                renderer.toggleStats(true)
                 Scenario.getInstance().setCurrentTool((cell) => {
                   cell.setCellOptions(opts);
                 });
+                currentToolSpan.innerHTML = `🔧 Add option (${option})`;
               }
             };
           });
@@ -399,7 +391,9 @@ document.addEventListener("DOMContentLoaded", function () {
               buttons = [{
                 name: "None",
                 detail: "Set in options",
-                action: () => { }
+                action: () => {
+                  renderer.toggleStats(true)
+                }
 
               }];
             }

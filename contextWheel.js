@@ -16,7 +16,11 @@ const SIZES = {
   lineWidth: 2,
 }
 
+
+
 export class ContextWheel extends HTMLElement {
+
+  static FULL_CIRCLE = Math.PI * 2;
   static instance = null;
 
   static Show(x,y, options) {
@@ -77,6 +81,33 @@ export class ContextWheel extends HTMLElement {
     this.renderCanvas(event.offsetX, event.offsetY);
   }
 
+  radToDeg(rad) {
+    const deg = rad * (180 / Math.PI);
+
+    if (deg < 0) {
+      return deg + 360;
+    }
+    if (deg > 360) {
+      return deg - 360;
+    }
+
+    return deg;
+  }
+
+  degToRad(deg) {
+    const rad = deg * (Math.PI / 180);
+
+    if (rad < 0) {
+      return rad + Math.PI * 2;
+    }
+
+    if (rad > Math.PI * 2) {
+      return rad - Math.PI * 2;
+    }
+
+    return rad;
+  }
+
   calculatePieSlice(event) {
     let x = event.offsetX;
     let y = event.offsetY;
@@ -114,7 +145,6 @@ export class ContextWheel extends HTMLElement {
   onClick(event) {
     let canvasTarget = event.composedPath().find((el) => el.tagName === 'CANVAS');
 
-
     if (canvasTarget) {
       let isCenter = this.isPointInCenter(event);
 
@@ -146,53 +176,56 @@ export class ContextWheel extends HTMLElement {
     ctx.lineWidth = SIZES.lineWidth;
 
     ctx.beginPath();
-    ctx.arc(center, center, SIZES.deadZone, 0, 2 * Math.PI);
+    ctx.arc(center, center, SIZES.deadZone, 0, ContextWheel.FULL_CIRCLE);
     ctx.fill();
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.arc(center, center, SIZES.radius, 0, 2 * Math.PI);
+    ctx.arc(center, center, SIZES.radius, 0, ContextWheel.FULL_CIRCLE);
     ctx.stroke();
 
-
+    ctx.lineWidth = SIZES.lineWidth;
     ctx.beginPath();
     for (let i = 0; i < this.options.length; i++) {
-
-      let angle = (i / this.options.length) * Math.PI * 2;
-      let slice = (1 / this.options.length) * Math.PI * 2;
-      let x = center + Math.cos(angle) * SIZES.radius;
-      let y = center + Math.sin(angle) * SIZES.radius;
-      let offsetX = center + Math.cos(angle)* SIZES.deadZone;
-      let offsetY = center + Math.sin(angle) * SIZES.deadZone;
-      let offsetX2 = center + Math.cos(angle + slice) * SIZES.deadZone;
-      let offsetY2 = center + Math.sin(angle + slice) * SIZES.deadZone;
+      const angle = (i / this.options.length) * ContextWheel.FULL_CIRCLE;
+      const slice = (1 / this.options.length) * ContextWheel.FULL_CIRCLE;
+      const degAngle = this.radToDeg(angle);
+      const degSlice = this.radToDeg(slice);
+      const x = center + Math.cos(angle) * SIZES.radius;
+      const y = center + Math.sin(angle) * SIZES.radius;
+      const offsetX = center + Math.cos(angle)* SIZES.deadZone;
+      const offsetY = center + Math.sin(angle) * SIZES.deadZone;
 
       ctx.moveTo(offsetX, offsetY);
       ctx.lineTo(x, y);
-
       if (this.options[i].color) {
-        let optXA = center + Math.cos(angle) * (SIZES.radius - SIZES.lineWidth);
-        let optYA = center + Math.sin(angle) * (SIZES.radius - SIZES.lineWidth);
-        let optXB = center + Math.cos(angle + slice) * (SIZES.radius - SIZES.lineWidth);
-        let optYB = center + Math.sin(angle + slice) * (SIZES.radius - SIZES.lineWidth);
-        let optXC = center + Math.cos(angle) * (SIZES.deadZone + SIZES.lineWidth);
-        let optYC = center + Math.sin(angle) * (SIZES.deadZone + SIZES.lineWidth);
+        const radAnglePlus2 = this.degToRad(degAngle + 0.5);
+        const radAngleMinus2 = this.degToRad(degAngle+ degSlice - 0.5);
+
+        let optXA = center + Math.cos(radAnglePlus2) * (SIZES.radius - SIZES.lineWidth);
+        let optYA = center + Math.sin(radAnglePlus2) * (SIZES.radius - SIZES.lineWidth);
+        let optXB = center + Math.cos(radAngleMinus2) * (SIZES.radius - SIZES.lineWidth);
+        let optYB = center + Math.sin(radAngleMinus2) * (SIZES.radius - SIZES.lineWidth);
+        let optXC = center + Math.cos(radAnglePlus2) * (SIZES.deadZone + SIZES.lineWidth);
+        let optYC = center + Math.sin(radAnglePlus2) * (SIZES.deadZone + SIZES.lineWidth);
 
         ctx.strokeStyle = this.options[i].color;
         ctx.beginPath();
         ctx.moveTo(optXC , optYC);
         ctx.lineTo(optXA, optYA);
-        ctx.arc(center, center, SIZES.radius - SIZES.lineWidth, angle, angle + slice);
+        ctx.arc(center, center, SIZES.radius - SIZES.lineWidth, radAnglePlus2,radAngleMinus2);
         ctx.lineTo(optXB, optYB);
-        ctx.arc(center, center, SIZES.deadZone+ SIZES.lineWidth, angle + slice, angle, true);
+        ctx.arc(center, center, SIZES.deadZone+ SIZES.lineWidth, radAngleMinus2, radAnglePlus2, true);
         ctx.stroke();
+        ctx.strokeStyle =THEME.border;
       }
+
 
     }
 
     ctx.stroke();
     let highlightingSlice = null;
-    //draw highlight
+
     if (pointerX && pointerY) {
       if (!this.isPointInCenter({ offsetX: pointerX, offsetY: pointerY })) {
         let slice = this.calculatePieSlice({ offsetX: pointerX, offsetY: pointerY });
@@ -205,7 +238,6 @@ export class ContextWheel extends HTMLElement {
         let offsetY = center + Math.sin(angle) * SIZES.deadZone;
         let offsetX2 = center + Math.cos(angle + sliceAngle) * SIZES.deadZone;
         let offsetY2 = center + Math.sin(angle + sliceAngle) * SIZES.deadZone;
-
         ctx.fillStyle = THEME.highlight;
         ctx.beginPath();
         ctx.moveTo(offsetX, offsetY);

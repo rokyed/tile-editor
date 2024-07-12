@@ -17,12 +17,10 @@ export class TileElement extends HTMLElement {
           height: 64px;
           background-size: cover;
           cursor: pointer;
-          border: 1px solid #f0f;
+          border: 1px solid #333;
           image-rendering: pixelated;
           background-image: url(${defaultImage});
         }
-
-
       </style>
     `;
   }

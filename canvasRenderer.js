@@ -111,10 +111,11 @@ export class XCanvasRenderer extends HTMLElement {
   }
 
   onTileInteract(event) {
+    let tileXY = this.getTileXYFromClickXY(event.offsetX, event.offsetY);
+    window.dispatchEvent(new CustomEvent('tile.interact', { detail: tileXY }));
     if (!this.isInteracting)
       return;
 
-    let tileXY = this.getTileXYFromClickXY(event.offsetX, event.offsetY);
     Scenario.getInstance().executeTool(tileXY.x, tileXY.y);
   }
 
@@ -215,6 +216,7 @@ export class XCanvasRenderer extends HTMLElement {
 
 
   render() {
+    console.time('t1');
     let renderingBatches = [];
     let rect = this.getBoundingClientRect();
     this.spread = Math.floor((Math.max(rect.width, rect.height) / this.cellSize) / 2) + OVERSPILL;
@@ -222,8 +224,13 @@ export class XCanvasRenderer extends HTMLElement {
     this.canvas.height = rect.height;
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
-    this.ctx.fillStyle = []
+    this.ctx.imageSmoothingEnabled = false;
+    this.ctx.font = '12px monospace';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillStyle = '#999';
     let centerX = Math.floor(this.canvas.width / 2);
     let centerY = Math.floor(this.canvas.height / 2);
 
@@ -241,32 +248,28 @@ export class XCanvasRenderer extends HTMLElement {
         const x = centerX + (item.x - this.x) * this.cellSize;
         const y = centerY + (item.y - this.y) * this.cellSize;
         if (item.image) {
-          this.ctx.imageSmoothingEnabled = false;
           this.ctx.drawImage(item.image, x, y, this.cellSize, this.cellSize);
         } else if (item.stats) {
           if (this.renderDetails) {
-            this.ctx.font = '12px monospace';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillStyle = '#999';
             this.ctx.fillText(item.stats.position, x + this.cellSize / 2, y + this.cellSize / 2);
             this.ctx.strokeStyle = '#999';
             this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
           }
 
           if (item.stats.options) {
-            let counter = 0;
+            let counter = 2;
             for (let key in item.stats.options) {
-              this.ctx.globalAlpha = 0.1;
-              this.ctx.fillStyle = scenarioOptions.getOption(key).color;
-              this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
-              counter++;
+              let size = this.cellSize - counter * 2;
+              this.ctx.strokeStyle = scenarioOptions.getOption(key).color;
+              this.ctx.strokeRect(x+counter, y+counter, size, size);
+              counter+= 2;
             }
-            this.ctx.globalAlpha = 1;
           }
         }
       }
     }
+
+    console.timeEnd('t1');
   }
 
   zoomIn() {
@@ -303,8 +306,12 @@ export class XCanvasRenderer extends HTMLElement {
     this.rafRender();
   }
 
-  toggleStats() {
-    this.renderStats = !this.renderStats;
+  toggleStats(override) {
+    if (override !== undefined) {
+      this.renderStats = override;
+    } else {
+     this.renderStats = !this.renderStats;
+    }
     this.rafRender();
   }
 
