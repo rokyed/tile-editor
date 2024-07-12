@@ -58,10 +58,19 @@ export class Cell {
 
   setCellOptions(options) {
     this.options = { ...this.options, ...options };
+
+    for (let k in options) {
+      if (options[k] === null) {
+        delete this.options[k];
+      }
+    }
   }
 
   getCellOptions() {
     return this.options;
+  }
+  clearCellOptions() {
+    this.options = {};
   }
 
   isAtOrInRange(x, y, spread) {

@@ -14,9 +14,11 @@
       <button id="load">Load Scenario</button>
       <button id="new_scenario">New Scenario</button>
       <button id="load_palette">Load Palette</button>
+      <button id="scenario_options">Options</button>
     </nav>
     <side>
       <button id="toggle_stats">Show details</button>
+      <button id="toggle_details">Show cell details</button>
       <div class="side_row">
         <button id="zoom_in">+</button>
         <button id="zoom_out">-</button>
@@ -33,10 +35,13 @@
       <button class="brush selected" name="brush_none">No action</button >
       <button class="brush" name="brush_single">Paint Single Tile</button >
       <button class="brush" name="brush_fill">Fill Area</button >
+      <button class="brush" name="remove_cell_properties">Remove properties</button>
+      <button class="brush" name="set_collision">Set Collision</button>
       <x-palette></x-palette>
     </side>
     <main name="viewport">
       <x-renderer></x-renderer>
     </main>
+    <scenario-options-modal></scenario-options-modal>
   </body>
 </html>

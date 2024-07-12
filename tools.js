@@ -33,6 +33,18 @@ export class Tools {
       cell.setTile(Tools.getInstance().currentBrush, layer);
     });
   }
+
+  clearPropertiesTool(cell, layer) {
+    cell.clearCellOptions();
+  }
+
+  setColliderTool(cell, layer) {
+    cell.setCellOptions({ collision: true });
+  }
+
+  removeColliderTool(cell, layer) {
+    cell.setCellOptions({ collision: false });
+  }
 }
 
 window.TOOLS = Tools.getInstance();

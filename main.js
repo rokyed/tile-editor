@@ -4,6 +4,7 @@ import { Tools } from "./tools.js";
 import './canvasRenderer.js';
 import './palette.js';
 import './tileElement.js';
+import { ScenarioOptionsModal } from "./scenarioOptionsModal.js";
 import { ContextWheel } from './contextWheel.js';
 
 /*
@@ -15,6 +16,18 @@ document.addEventListener("DOMContentLoaded", function () {
   let renderer = document.querySelector("x-renderer");
   let saveButton = document.querySelector("button#save");
   let loadButton = document.querySelector("button#load");
+  let scenarioOptionsButton = document.querySelector("button#scenario_options");
+
+  scenarioOptionsButton.addEventListener("click", function () {
+    const scenarioOptionsModal = document.querySelector("scenario-options-modal");
+
+    if (!scenarioOptionsModal) {
+      const modal = new ScenarioOptionsModal();
+      document.body.appendChild(modal);
+    }
+
+    scenarioOptionsModal.openDialog();
+  });
 
   saveButton.addEventListener("click", function () {
     let scenario = Scenario.getInstance();
@@ -92,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let loadPaletteButton = document.querySelector("button#load_palette");
   loadPaletteButton.addEventListener("click", function () {
-    let  paletteTileSize = parseInt(prompt("Enter the size of the palette tile (in pixels)", "16"));
+    let paletteTileSize = parseInt(prompt("Enter the size of the palette tile (in pixels)", "16"));
 
     if (isNaN(paletteTileSize)) {
       alert("Invalid palette tile size");
@@ -293,14 +306,6 @@ document.addEventListener("DOMContentLoaded", function () {
           renderer.lazyRender();
         }
       },
-
-      {
-        name: "🕵️‍♂️",
-        detail: "See Stats",
-        action: function () {
-          renderer.toggleStats();
-        }
-      },
       {
         name: "🔎+",
         detail: "Zoom In",
@@ -321,6 +326,85 @@ document.addEventListener("DOMContentLoaded", function () {
         detail: "Reset Zoom",
         action: function () {
           renderer.zoomReset();
+        }
+      },
+      {
+        name: "🔧[]",
+        detail: "Clear options",
+        action: function () {
+          Scenario.getInstance().setCurrentTool((cell) => {
+            cell.clearCellOptions();
+          });
+        }
+      },
+      {
+        detail: "Remove option",
+        name: "🔧-",
+        action: function () {
+          let options = Scenario.getInstance().getOptions();
+          let buttons = Scenario.getInstance().getOptions().map((option, index, arr) => {
+            let optObj = options.getOption(option);
+            return {
+              name: option || "No key",
+              color: optObj.color,
+              detail: optObj.value || "",
+              action: () => {
+                let opts = {};
+                opts[option] = null;
+                Scenario.getInstance().setCurrentTool((cell) => {
+                  cell.setCellOptions(opts);
+                });
+              }
+            };
+          });
+
+          setTimeout(() => {
+            if (!buttons || buttons.length === 0) {
+              buttons = [{
+                name: "None",
+                detail: "Set in options",
+                action: () => { }
+
+              }];
+            }
+            ContextWheel.Show(event.clientX, event.clientY, buttons);
+          });
+
+
+        }
+      },
+      {
+        detail: "Add option",
+        name: "🔧+",
+        action: function () {
+          let options = Scenario.getInstance().getOptions();
+          let buttons = Scenario.getInstance().getOptions().map((option, index, arr) => {
+            let optObj = options.getOption(option);
+            return {
+              name: option,
+              color: optObj.color,
+              detail: optObj.value || "",
+              action: () => {
+                let opts = {};
+                opts[option] = true;
+                Scenario.getInstance().setCurrentTool((cell) => {
+                  cell.setCellOptions(opts);
+                });
+              }
+            };
+          });
+
+          setTimeout(() => {
+            if (!buttons || buttons.length === 0) {
+              buttons = [{
+                name: "None",
+                detail: "Set in options",
+                action: () => { }
+
+              }];
+            }
+            ContextWheel.Show(event.clientX, event.clientY, buttons);
+          });
         }
       }
     ]);

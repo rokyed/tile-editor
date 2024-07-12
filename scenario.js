@@ -1,7 +1,7 @@
 import { Cell } from './cell.js';
 import { Tile } from './tile.js';
+import { Options } from './options.js';
 import { defaultImage, defaultImageWidth, defaultImageHeight } from './staticData.js';
-
 
 export class Scenario {
 
@@ -25,6 +25,7 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
     instance.layerCount = data.layerCount;
     instance.palette = data.palette.map(tile => Tile.deserialize(tile));
     instance.mapCells = data.mapCells.map(cell => Cell.deserialize(cell, instance.palette));
+    instance.options = Options.deserialize(data.options, instance);
     instance.setAdjacents();
 
     requestAnimationFrame(() => {
@@ -39,8 +40,10 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
   mapCells = [];
   palette = [];
   updatingTimer = null;
+  options = null;
 
   constructor(width, height) {
+    this.options = new Options(this);
     this.newScenario(width, height);
   }
 
@@ -49,7 +52,8 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
       mapSize: this.mapSize,
       mapCells: this.mapCells.map(cell => cell.serialize()),
       palette: this.palette.map(tile => tile.serialize()),
-      layerCount: this.layerCount
+      layerCount: this.layerCount,
+      options: this.options.serialize()
     }
   }
 
@@ -222,6 +226,10 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
     if (cell) {
       cell.setCellOptions(options);
     }
+  }
+
+  getOptions() {
+    return this.options;
   }
 
   fireUpdate() {

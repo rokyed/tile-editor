@@ -7,6 +7,7 @@ const OVERSPILL = 2;
 
 export class XCanvasRenderer extends HTMLElement {
   renderStats = false;
+  renderDetails = false;
   cellSize = DEFAULT_CELL_SIZE;
   xPixel = 0;
   yPixel = 0;
@@ -164,15 +165,22 @@ export class XCanvasRenderer extends HTMLElement {
     let maxX = this.x + this.spread;
     let maxY = this.y + this.spread;
 
+    const scenario = Scenario.getInstance();
+    const options = scenario.getOptions();
 
-    for (let x = minX; x < maxX; x++) {
-      for (let y = minY; y < maxY; y++) {
-        batch.push({
-          x: x,
-          y: y,
-          stats: `(${x}, ${y})`
-        });
-      }
+    for (let c = 0; c < cells.length; c++) {
+      const cell = cells[c];
+      const cellOptions = cell.getCellOptions();
+
+
+      batch.push({
+        x: cell.x,
+        y: cell.y,
+        stats: {
+          position: `(${cell.x}, ${cell.y})`,
+          options: cellOptions,
+        }
+      });
     }
 
     batches.push(batch);
@@ -220,10 +228,11 @@ export class XCanvasRenderer extends HTMLElement {
     let centerY = Math.floor(this.canvas.height / 2);
 
     const scenario = Scenario.getInstance();
+    const scenarioOptions = scenario.getOptions();
     const cells = scenario.getCellsZone(this.x, this.y, this.spread);
-    this.prepareBackground(renderingBatches);
+    this.prepareBackground(renderingBatches, cells);
     this.prepareRenderingLayers(renderingBatches, cells);
-    this.prepareStats(renderingBatches);
+    this.prepareStats(renderingBatches, cells);
 
     for (let b = 0; b < renderingBatches.length; b++) {
       const batch = renderingBatches[b];
@@ -235,13 +244,26 @@ export class XCanvasRenderer extends HTMLElement {
           this.ctx.imageSmoothingEnabled = false;
           this.ctx.drawImage(item.image, x, y, this.cellSize, this.cellSize);
         } else if (item.stats) {
-          this.ctx.font = '12px monospace';
-          this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          this.ctx.fillStyle = '#FFF';
-          this.ctx.fillText(item.stats, x+ this.cellSize/2, y + this.cellSize/2);
-          this.ctx.strokeStyle = '#FFF';
-          this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
+          if (this.renderDetails) {
+            this.ctx.font = '12px monospace';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillStyle = '#999';
+            this.ctx.fillText(item.stats.position, x + this.cellSize / 2, y + this.cellSize / 2);
+            this.ctx.strokeStyle = '#999';
+            this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
+          }
+
+          if (item.stats.options) {
+            let counter = 0;
+            for (let key in item.stats.options) {
+              this.ctx.globalAlpha = 0.1;
+              this.ctx.fillStyle = scenarioOptions.getOption(key).color;
+              this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
+              counter++;
+            }
+            this.ctx.globalAlpha = 1;
+          }
         }
       }
     }
