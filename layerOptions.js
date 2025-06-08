@@ -55,6 +55,15 @@ export class LayerOptions extends HTMLElement {
           flex: 1 1 1px;
           white-space: nowrap;
         }
+        button {
+          background: #555;
+          color: #FFF;
+          cursor: pointer;
+          border: 2px solid #999;
+        }
+        button:hover {
+          background: #777;
+        }
       </style>
       <details>
         <summary>Layer Options</summary>
