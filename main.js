@@ -6,6 +6,7 @@ import './canvasRenderer.js';
 import './palette.js';
 import './tileElement.js';
 import { ScenarioOptionsModal } from "./scenarioOptionsModal.js";
+import { SaveScenarioModal, LoadScenarioModal } from "./scenarioStorageModals.js";
 import { ContextWheel } from './contextWheel.js';
 import './layerOptions.js';
 
@@ -33,6 +34,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentToolSpan = document.querySelector("span#current_tool");
   let currentTileSpan = document.querySelector("span#current_tile");
   let scenarioOptionsButton = document.querySelector("button#scenario_options");
+  let saveLocalButton = document.querySelector("button#save_local");
+  let loadLocalButton = document.querySelector("button#load_local");
 
   window.addEventListener("tile.interact", function (event) {
     currentTileSpan.innerText = `${event.detail.x}, ${event.detail.y}`;
@@ -47,6 +50,24 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     scenarioOptionsModal.openDialog();
+  });
+
+  saveLocalButton.addEventListener("click", function () {
+    let modal = document.querySelector("save-scenario-modal");
+    if (!modal) {
+      modal = new SaveScenarioModal();
+      document.body.appendChild(modal);
+    }
+    modal.openDialog();
+  });
+
+  loadLocalButton.addEventListener("click", function () {
+    let modal = document.querySelector("load-scenario-modal");
+    if (!modal) {
+      modal = new LoadScenarioModal();
+      document.body.appendChild(modal);
+    }
+    modal.openDialog();
   });
 
   saveButton.addEventListener("click", function () {
