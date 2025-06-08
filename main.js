@@ -1,5 +1,6 @@
 import { Scenario } from "./scenario.js";
 import { Tools } from "./tools.js";
+import { defaultImage, defaultImageWidth, defaultImageHeight } from "./staticData.js";
 //import './renderer.js';
 import './canvasRenderer.js';
 import './palette.js';
@@ -185,6 +186,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     fileInput.click();
+  });
+
+  let generatePaletteButton = document.querySelector("button#generate_palette");
+  generatePaletteButton.addEventListener("click", function () {
+    const scenario = Scenario.getInstance();
+    if (scenario.getPalette().length > 0)
+      return;
+    scenario.pushImageIntoPalette(defaultImage, defaultImageWidth, defaultImageHeight);
+    renderer.lazyRender();
   });
 
   let newScenarioButton = document.querySelector("button#new_scenario");
