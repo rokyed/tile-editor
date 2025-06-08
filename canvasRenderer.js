@@ -4,6 +4,8 @@ const DEFAULT_CELL_SIZE = 32;
 const DEFAULT_CELL_MAX_ZOOM = 128;
 const DEFAULT_CELL_MIN_ZOOM = 2;
 const OVERSPILL = 2;
+const SCROLLBAR_SIZE = 12;
+const MIN_HANDLE_SIZE = 20;
 
 export class XCanvasRenderer extends HTMLElement {
   renderStats = false;
@@ -18,6 +20,7 @@ export class XCanvasRenderer extends HTMLElement {
   imageRenderer = null;
   canvas = null;
   isInteracting = false;
+  scrollbarDrag = null;
   renderCurrentLayerOnly = false;
 
   constructor() {
@@ -101,6 +104,8 @@ export class XCanvasRenderer extends HTMLElement {
   startOnTileInteract(event) {
     if (event.button !== 0)
       return;
+    if (this.tryStartScrollbarDrag(event))
+      return;
 
     this.isInteracting = true;
     this.onTileInteract(event);
@@ -108,15 +113,62 @@ export class XCanvasRenderer extends HTMLElement {
 
   stopOnTileInteract(event) {
     this.isInteracting = false;
+    this.scrollbarDrag = null;
   }
 
   onTileInteract(event) {
+    if (this.scrollbarDrag) {
+      this.updateScrollFromPointer(event.offsetX, event.offsetY);
+      return;
+    }
     let tileXY = this.getTileXYFromClickXY(event.offsetX, event.offsetY);
     window.dispatchEvent(new CustomEvent('tile.interact', { detail: tileXY }));
     if (!this.isInteracting)
       return;
 
     Scenario.getInstance().executeTool(tileXY.x, tileXY.y);
+  }
+
+  tryStartScrollbarDrag(event) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = event.offsetX;
+    const y = event.offsetY;
+    const trackWidth = rect.width - SCROLLBAR_SIZE;
+    const trackHeight = rect.height - SCROLLBAR_SIZE;
+
+    if (y >= rect.height - SCROLLBAR_SIZE && x <= trackWidth) {
+      this.scrollbarDrag = 'horizontal';
+      this.updateScrollFromPointer(x, y);
+      return true;
+    }
+
+    if (x >= rect.width - SCROLLBAR_SIZE && y <= trackHeight) {
+      this.scrollbarDrag = 'vertical';
+      this.updateScrollFromPointer(x, y);
+      return true;
+    }
+
+    return false;
+  }
+
+  updateScrollFromPointer(x, y) {
+    const scenario = Scenario.getInstance();
+
+    if (this.scrollbarDrag === 'horizontal') {
+      const trackWidth = this.canvas.width - SCROLLBAR_SIZE;
+      const ratio = Math.max(0, Math.min(1, x / trackWidth));
+      const maxX = Math.max(scenario.getMapWidth() - 1, 1);
+      this.xPixel = ratio * maxX;
+      this.x = Math.floor(this.xPixel);
+    } else if (this.scrollbarDrag === 'vertical') {
+      const trackHeight = this.canvas.height - SCROLLBAR_SIZE;
+      const ratio = Math.max(0, Math.min(1, y / trackHeight));
+      const maxY = Math.max(scenario.getMapHeight() - 1, 1);
+      this.yPixel = ratio * maxY;
+      this.y = Math.floor(this.yPixel);
+    }
+
+    this.render();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -268,6 +320,34 @@ export class XCanvasRenderer extends HTMLElement {
         }
       }
     }
+
+    // draw custom scrollbars
+    const mapWidthPx = scenario.getMapWidth() * this.cellSize;
+    const mapHeightPx = scenario.getMapHeight() * this.cellSize;
+
+    const hTrackLen = this.canvas.width - SCROLLBAR_SIZE;
+    const vTrackLen = this.canvas.height - SCROLLBAR_SIZE;
+
+    this.ctx.fillStyle = '#444';
+    this.ctx.fillRect(0, this.canvas.height - SCROLLBAR_SIZE, hTrackLen, SCROLLBAR_SIZE);
+    this.ctx.fillRect(this.canvas.width - SCROLLBAR_SIZE, 0, SCROLLBAR_SIZE, vTrackLen);
+    this.ctx.fillRect(this.canvas.width - SCROLLBAR_SIZE, this.canvas.height - SCROLLBAR_SIZE, SCROLLBAR_SIZE, SCROLLBAR_SIZE);
+
+    let hRatio = this.canvas.width / mapWidthPx;
+    if (hRatio > 1) hRatio = 1;
+    const hHandleLen = Math.max(MIN_HANDLE_SIZE, hTrackLen * hRatio);
+    const maxX = Math.max(scenario.getMapWidth() - 1, 1);
+    const handleHX = (this.xPixel / maxX) * (hTrackLen - hHandleLen);
+
+    let vRatio = this.canvas.height / mapHeightPx;
+    if (vRatio > 1) vRatio = 1;
+    const vHandleLen = Math.max(MIN_HANDLE_SIZE, vTrackLen * vRatio);
+    const maxY = Math.max(scenario.getMapHeight() - 1, 1);
+    const handleHY = (this.yPixel / maxY) * (vTrackLen - vHandleLen);
+
+    this.ctx.fillStyle = '#888';
+    this.ctx.fillRect(handleHX, this.canvas.height - SCROLLBAR_SIZE, hHandleLen, SCROLLBAR_SIZE);
+    this.ctx.fillRect(this.canvas.width - SCROLLBAR_SIZE, handleHY, SCROLLBAR_SIZE, vHandleLen);
 
     console.timeEnd('t1');
   }
