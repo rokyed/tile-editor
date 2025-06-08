@@ -17,9 +17,10 @@ function generateColorTile(color, width, height) {
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = color;
   ctx.fillRect(0, 0, width, height);
-  return new Promise(resolve => {
-    canvas.toBlob(blob => resolve(blob), 'image/png');
-  });
+
+  // Using a data URL instead of a blob ensures that palette tiles
+  // persist correctly when stored in localStorage.
+  return canvas.toDataURL('image/png');
 }
 
 /*
@@ -195,15 +196,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
           for (let y = 0; y < vCells; y++) {
             for (let x = 0; x < hCells; x++) {
-              let tile = ctx.getImageData(x * paletteTileSize, y * paletteTileSize, paletteTileSize, paletteTileSize);
-              let tileCanvas = document.createElement("canvas");
+              const tile = ctx.getImageData(x * paletteTileSize, y * paletteTileSize, paletteTileSize, paletteTileSize);
+              const tileCanvas = document.createElement("canvas");
               tileCanvas.width = paletteTileSize;
               tileCanvas.height = paletteTileSize;
               tileCanvas.style.display = "none";
               tileCanvas.getContext("2d").putImageData(tile, 0, 0);
               document.body.appendChild(tileCanvas);
               const url = tileCanvas.toDataURL();
-              scenario.pushImageIntoPalette(url, x, y);
+              scenario.pushImageIntoPalette(url, paletteTileSize, paletteTileSize);
 
               tileCanvas.remove();
             }
@@ -222,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   let generatePaletteButton = document.querySelector("button#generate_palette");
-  generatePaletteButton.addEventListener("click", async function () {
+  generatePaletteButton.addEventListener("click", function () {
     const scenario = Scenario.getInstance();
     if (scenario.getPalette().length > 0)
       return;
@@ -233,8 +234,8 @@ document.addEventListener("DOMContentLoaded", function () {
     ];
 
     for (const color of colors) {
-      const blob = await generateColorTile(color, defaultImageWidth, defaultImageHeight);
-      scenario.pushImageIntoPalette(blob, defaultImageWidth, defaultImageHeight, color);
+      const dataUrl = generateColorTile(color, defaultImageWidth, defaultImageHeight);
+      scenario.pushImageIntoPalette(dataUrl, defaultImageWidth, defaultImageHeight, color);
     }
     renderer.lazyRender();
   });
