@@ -41,16 +41,19 @@ export class LayerOptions extends HTMLElement {
         :host {
           display: block;
           border: 1px solid #333;
+          border-radius: 4px;
           padding: 4px;
           margin-top: 4px;
+          background: #444;
         }
         .row {
           display: flex;
           gap: 4px;
+          margin-bottom: 4px;
         }
         .row > * {
           flex: 1 1 1px;
-          text-wrap: nowrap;
+          white-space: nowrap;
         }
       </style>
       <details>
