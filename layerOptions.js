@@ -44,7 +44,7 @@ export class LayerOptions extends HTMLElement {
           gap: 4px;
         }
       </style>
-      <details open>
+      <details>
         <summary>Layer Options</summary>
         <div class="row">
           <button id="add_layer">Add</button>
