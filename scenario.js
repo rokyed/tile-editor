@@ -137,6 +137,9 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
   incrementLayer() {
     let newLayer = this.currentLayer + 1;
 
+    if (newLayer > this.layerCount - 1)
+      newLayer = this.layerCount - 1;
+
     if (newLayer > Scenario.DEFAULT_UPPER_LAYER_LIMIT - 1)
       newLayer = Scenario.DEFAULT_UPPER_LAYER_LIMIT - 1;
 
@@ -150,6 +153,26 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
       newLayer = Scenario.DEFAULT_LOWER_LAYER_LIMIT;
 
     this.currentLayer = newLayer;
+  }
+
+  addLayer() {
+    if (this.layerCount >= Scenario.DEFAULT_UPPER_LAYER_LIMIT)
+      return;
+    this.layerCount += 1;
+    this.fireUpdate();
+  }
+
+  removeLayer() {
+    if (this.layerCount <= 1)
+      return;
+    this.layerCount -= 1;
+    this.mapCells.forEach(cell => {
+      delete cell.tiles[this.layerCount];
+    });
+    if (this.currentLayer >= this.layerCount) {
+      this.currentLayer = this.layerCount - 1;
+    }
+    this.fireUpdate();
   }
 
   setMapHeight(height) {

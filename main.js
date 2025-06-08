@@ -6,6 +6,7 @@ import './palette.js';
 import './tileElement.js';
 import { ScenarioOptionsModal } from "./scenarioOptionsModal.js";
 import { ContextWheel } from './contextWheel.js';
+import './layerOptions.js';
 
 /*
  * In this file all the different modules are imported, used and fused together
