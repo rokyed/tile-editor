@@ -78,7 +78,7 @@ nav label {
   color: #fff;
   padding: 0;
   border: 1px solid #999;
-  display:: block;
+  display: block;
 }
 
 label input {
@@ -140,5 +140,5 @@ x-renderer {
 
 .side_row > * {
   flex: 1 1 1px;
-  text-wrap: nowrap;
+  white-space: nowrap;
 }
