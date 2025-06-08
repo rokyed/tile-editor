@@ -1,5 +1,21 @@
 import { Scenario } from "./scenario.js";
 
+const LOCAL_STORAGE_LIMIT = 5 * 1024 * 1024; // 5MB approximation
+
+function getLocalStorageUsage() {
+  let used = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    const value = localStorage.getItem(key);
+    used += key.length + value.length;
+  }
+  return used;
+}
+
+function getLocalStorageRemaining() {
+  return Math.max(0, LOCAL_STORAGE_LIMIT - getLocalStorageUsage());
+}
+
 export class SaveScenarioModal extends HTMLElement {
   open = false;
   constructor() {
@@ -33,6 +49,7 @@ export class SaveScenarioModal extends HTMLElement {
   }
 
   render() {
+    const remainingKB = (getLocalStorageRemaining() / 1024).toFixed(1);
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -79,7 +96,7 @@ export class SaveScenarioModal extends HTMLElement {
         <div class="controls"><button name="close">X</button></div>
         <label>Scenario Name</label>
         <input type="text" name="scenario_name"/>
-        <button name="save">Save</button>
+        <button name="save">Save (${remainingKB} KB left)</button>
       </div>
     `;
   }
@@ -121,6 +138,15 @@ export class LoadScenarioModal extends HTMLElement {
         Scenario.deserialize(JSON.parse(data));
       }
       this.closeDialog();
+      return;
+    }
+    const deleteBtn = path.find(el => el.classList?.contains('delete_scenario'));
+    if (deleteBtn) {
+      const name = deleteBtn.getAttribute('data-name');
+      if (name && confirm(`Delete scenario "${name}"?`)) {
+        localStorage.removeItem(`scenario:${name}`);
+        this.render();
+      }
       return;
     }
   }
@@ -166,12 +192,13 @@ export class LoadScenarioModal extends HTMLElement {
         }
         .controls { display:flex; justify-content:flex-end; }
         .scenario { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+        .scenario div { display:flex; gap:4px; }
       </style>
       <div class="content">
         <div class="controls"><button name="close">X</button></div>
         <h2>Load Scenario</h2>
         ${names.length === 0 ? '<p>No saved scenarios</p>' : ''}
-        ${names.map(n => `<div class="scenario"><span>${n}</span><button class="load_scenario" data-name="${n}">Load</button></div>`).join('')}
+        ${names.map(n => `<div class="scenario"><span>${n}</span><div><button class="load_scenario" data-name="${n}">Load</button><button class="delete_scenario" data-name="${n}">Delete</button></div></div>`).join('')}
       </div>
     `;
   }
