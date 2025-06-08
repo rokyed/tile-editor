@@ -98,8 +98,8 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
     this.fireUpdate();
   }
 
-  pushImageIntoPalette(image, width, height) {
-    let tile = new Tile(this.palette.length, width, height, image);
+  pushImageIntoPalette(image, width, height, color = "#FF00FF") {
+    let tile = new Tile(this.palette.length, width, height, image, color);
     this.palette.push(tile);
     this.fireUpdate();
   }
