@@ -67,23 +67,28 @@ document.addEventListener("DOMContentLoaded", function () {
     fileInput.click();
   });
 
-  let layerUpButton = document.querySelector(`button#layer_up`);
-  let layerDownButton = document.querySelector(`button#layer_down`);
-  let layerView = document.querySelector(`span[name="current_layer"]`);
-  let layerOnlyButton = document.querySelector(`button#toggle_only_layer`);
-  layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
-  layerOnlyButton.addEventListener('click', function () {
+  const layerOptions = document.querySelector('layer-options');
+  const layerShadow = layerOptions?.shadowRoot;
+  let layerUpButton = layerShadow?.querySelector(`#layer_up`);
+  let layerDownButton = layerShadow?.querySelector(`#layer_down`);
+  let layerView = layerShadow?.querySelector('[name="current_layer"]');
+  let layerOnlyButton = layerShadow?.querySelector(`#toggle_only_layer`);
+  if (layerView)
+    layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
+  layerOnlyButton?.addEventListener('click', function () {
     renderer.toggleRenderOnlyCurrentLayer();
   });
-  layerUpButton.addEventListener('click', function () {
+  layerUpButton?.addEventListener('click', function () {
     Scenario.getInstance().incrementLayer();
-    layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
+    if (layerView)
+      layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
     renderer.lazyRender();
   });
 
-  layerDownButton.addEventListener('click', function () {
+  layerDownButton?.addEventListener('click', function () {
     Scenario.getInstance().decrementLayer();
-    layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
+    if (layerView)
+      layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
     renderer.lazyRender();
   });
 

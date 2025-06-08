@@ -24,9 +24,14 @@ export class LayerOptions extends HTMLElement {
   }
 
   update() {
+    const scenario = Scenario.getInstance();
     const countSpan = this.shadowRoot.querySelector("#layer_count");
     if (countSpan) {
-      countSpan.textContent = Scenario.getInstance().layerCount;
+      countSpan.textContent = scenario.layerCount;
+    }
+    const layerView = this.shadowRoot.querySelector('[name="current_layer"]');
+    if (layerView) {
+      layerView.textContent = `Current layer: ${scenario.currentLayer}`;
     }
   }
 
@@ -43,6 +48,10 @@ export class LayerOptions extends HTMLElement {
           display: flex;
           gap: 4px;
         }
+        .row > * {
+          flex: 1 1 1px;
+          text-wrap: nowrap;
+        }
       </style>
       <details>
         <summary>Layer Options</summary>
@@ -51,6 +60,12 @@ export class LayerOptions extends HTMLElement {
           <button id="remove_layer">Remove</button>
         </div>
         <div>Layer count: <span id="layer_count"></span></div>
+        <div class="row">
+          <button id="layer_down">-</button>
+          <span name="current_layer">Current layer</span>
+          <button id="layer_up">+</button>
+          <button id="toggle_only_layer">Only</button>
+        </div>
       </details>
     `;
     this.update();
