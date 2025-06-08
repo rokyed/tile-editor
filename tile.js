@@ -10,17 +10,25 @@ export class Tile {
   index= -1;
   width = 64;
   height = 64;
-  image = null;
+  image = null; // string URL for rendering
+  blob = null;
   color = "#FF00FF";
   properties = {
     layer: 0,
   };
 
-  constructor(index,w, h, image, color = "#FF00FF", tileOptions = {}) {
+  constructor(index, w, h, image, color = "#FF00FF", tileOptions = {}) {
     this.index = index;
     this.width = w;
     this.height = h;
-    this.image = image;
+
+    if (image instanceof Blob) {
+      this.blob = image;
+      this.image = URL.createObjectURL(image);
+    } else {
+      this.image = image;
+    }
+
     this.color = color;
     this.properties = { ...this.properties, ...tileOptions };
   }
@@ -38,7 +46,14 @@ export class Tile {
   }
 
   getImage() {
+    if (!this.image && this.blob) {
+      this.image = URL.createObjectURL(this.blob);
+    }
     return this.image;
+  }
+
+  getBlob() {
+    return this.blob;
   }
 
   getIndex() {

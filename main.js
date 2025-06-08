@@ -9,6 +9,18 @@ import { ScenarioOptionsModal } from "./scenarioOptionsModal.js";
 import { ContextWheel } from './contextWheel.js';
 import './layerOptions.js';
 
+function generateColorTile(color, width, height) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, width, height);
+  return new Promise(resolve => {
+    canvas.toBlob(blob => resolve(blob), 'image/png');
+  });
+}
+
 /*
  * In this file all the different modules are imported, used and fused together
  */
@@ -189,11 +201,20 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   let generatePaletteButton = document.querySelector("button#generate_palette");
-  generatePaletteButton.addEventListener("click", function () {
+  generatePaletteButton.addEventListener("click", async function () {
     const scenario = Scenario.getInstance();
     if (scenario.getPalette().length > 0)
       return;
-    scenario.pushImageIntoPalette(defaultImage, defaultImageWidth, defaultImageHeight);
+    const colors = [
+      '#ff0000', '#00ff00', '#0000ff', '#ffff00',
+      '#00ffff', '#ff00ff', '#ffffff', '#000000',
+      '#808080', '#ffa500', '#800080', '#a52a2a'
+    ];
+
+    for (const color of colors) {
+      const blob = await generateColorTile(color, defaultImageWidth, defaultImageHeight);
+      scenario.pushImageIntoPalette(blob, defaultImageWidth, defaultImageHeight, color);
+    }
     renderer.lazyRender();
   });
 
