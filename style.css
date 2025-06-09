@@ -153,3 +153,13 @@ x-renderer {
   flex: 1 1 40px;
   white-space: nowrap;
 }
+
+details#tools_wrapper {
+  border: 1px solid #999;
+  padding: 4px;
+}
+
+details#tools_wrapper > summary {
+  cursor: pointer;
+  user-select: none;
+}
