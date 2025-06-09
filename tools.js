@@ -18,10 +18,15 @@ export class Tools {
   }
 
   paintTool(cell, layer) {
-    cell.setTile(Tools.getInstance().currentBrush, layer);
+    const brush = Tools.getInstance().currentBrush;
+    cell.setTile(brush, layer);
+    if (brush) {
+      cell.setCellOptions(brush.getTileOptions());
+    }
   }
 
   fillTool(cell, layer) {
+    const brush = Tools.getInstance().currentBrush;
     const currentTile = cell.getTile(layer);
     let cells = new Set();
     cell.getAdjacentCellsWhere(cells, (adjacent, arr) => {
@@ -30,7 +35,10 @@ export class Tools {
 
 
     cells.forEach((cell) => {
-      cell.setTile(Tools.getInstance().currentBrush, layer);
+      cell.setTile(brush, layer);
+      if (brush) {
+        cell.setCellOptions(brush.getTileOptions());
+      }
     });
   }
 

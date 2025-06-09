@@ -5,6 +5,7 @@ import { defaultImage, defaultImageWidth, defaultImageHeight } from "./staticDat
 import './canvasRenderer.js';
 import './palette.js';
 import './tileElement.js';
+import './tileOptions.js';
 import { ScenarioOptionsModal } from "./scenarioOptionsModal.js";
 import { SaveScenarioModal, LoadScenarioModal } from "./scenarioStorageModals.js";
 import { ContextWheel } from './contextWheel.js';
