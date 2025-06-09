@@ -276,127 +276,124 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  let body = document.querySelector("body");
+  const toolsSection = document.querySelector('#tools_section');
 
-  body.addEventListener("contextmenu", function (event) {
-    event.preventDefault();
-    ContextWheel.Show(event.clientX, event.clientY, [
+  function createToolObjects() {
+    return [
       {
-        name: "🖌️",
-        detail: "Paint tool",
-        color: "rgba(255, 165, 0, 0.5)",
-        action: function () {
+        name: '🖌️',
+        detail: 'Paint tool',
+        color: 'rgba(255, 165, 0, 0.5)',
+        action: function (evt) {
           const scenario = Scenario.getInstance();
           const tools = Tools.getInstance();
           scenario.setCurrentTool(tools.paintTool);
-          currentToolSpan.innerHTML = "🖌️ Paint tool";
+          currentToolSpan.innerHTML = '🖌️ Paint tool';
         }
       },
       {
-        name: "🪣",
-        detail: "Fill tool",
-        color: "rgba(255, 165, 0, 0.5)",
-        action: function () {
+        name: '🪣',
+        detail: 'Fill tool',
+        color: 'rgba(255, 165, 0, 0.5)',
+        action: function (evt) {
           const scenario = Scenario.getInstance();
           const tools = Tools.getInstance();
           scenario.setCurrentTool(tools.fillTool);
-          currentToolSpan.innerHTML = "🪣 Fill tool";
+          currentToolSpan.innerHTML = '🪣 Fill tool';
         }
       },
       {
-        name: "🚫",
-        detail: "No tool",
-        color: "rgba(255, 165, 0, 0.5)",
-        action: function () {
+        name: '🚫',
+        detail: 'No tool',
+        color: 'rgba(255, 165, 0, 0.5)',
+        action: function (evt) {
           const scenario = Scenario.getInstance();
           const tools = Tools.getInstance();
           scenario.setCurrentTool(tools.noopTool);
-          currentToolSpan.innerHTML = "🚫 No tool";
+          currentToolSpan.innerHTML = '🚫 No tool';
         }
       },
       {
-        name: "📥",
-        detail: "Layer Down",
-        color: "rgba(255, 0, 0, 0.5)",
-        action: function () {
+        name: '📥',
+        detail: 'Layer Down',
+        color: 'rgba(255, 0, 0, 0.5)',
+        action: function (evt) {
           Scenario.getInstance().decrementLayer();
           layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
           renderer.lazyRender();
         }
       },
       {
-        name: "👁️",
-        detail: "See Layer Only",
-        color: "rgba(255, 0, 0, 0.5)",
-        action: function () {
+        name: '👁️',
+        detail: 'See Layer Only',
+        color: 'rgba(255, 0, 0, 0.5)',
+        action: function (evt) {
           renderer.toggleRenderOnlyCurrentLayer();
         }
       },
-
       {
-        name: "📤",
-        detail: "Layer Up",
-        color: "rgba(255, 0, 0, 0.5)",
-        action: function () {
+        name: '📤',
+        detail: 'Layer Up',
+        color: 'rgba(255, 0, 0, 0.5)',
+        action: function (evt) {
           Scenario.getInstance().incrementLayer();
           layerView.innerHTML = `Current layer: ${Scenario.getInstance().currentLayer}`;
           renderer.lazyRender();
         }
       },
       {
-        name: "🔎+",
-        detail: "Zoom In",
-        color: "rgba(0, 255, 255, 0.5)",
-        action: function () {
+        name: '🔎+',
+        detail: 'Zoom In',
+        color: 'rgba(0, 255, 255, 0.5)',
+        action: function (evt) {
           renderer.zoomIn();
         }
       },
       {
-        name: "🔎-",
-        detail: "Zoom Out",
-        color: "rgba(0, 255, 255, 0.5)",
-        action: function () {
+        name: '🔎-',
+        detail: 'Zoom Out',
+        color: 'rgba(0, 255, 255, 0.5)',
+        action: function (evt) {
           renderer.zoomOut();
-
         }
       },
       {
-        name: "🔎↺",
-        detail: "Reset Zoom",
-        color: "rgba(0, 255, 255, 0.5)",
-        action: function () {
+        name: '🔎↺',
+        detail: 'Reset Zoom',
+        color: 'rgba(0, 255, 255, 0.5)',
+        action: function (evt) {
           renderer.zoomReset();
         }
       },
       {
-        name: "🧹",
-        detail: "Clear options",
-        color: "rgba(0, 100, 255, 0.5)",
-        action: function () {
+        name: '🧹',
+        detail: 'Clear options',
+        color: 'rgba(0, 100, 255, 0.5)',
+        action: function (evt) {
           renderer.toggleStats(true);
           Scenario.getInstance().setCurrentTool((cell) => {
             cell.clearCellOptions();
           });
-          currentToolSpan.innerHTML = "🧹 Clear options";
+          currentToolSpan.innerHTML = '🧹 Clear options';
         }
       },
       {
-        detail: "Remove option",
-        name: "🔧-",
-        color: "rgba(0, 100, 255, 0.5)",
-        action: function () {
+        name: '🔧-',
+        detail: 'Remove option',
+        color: 'rgba(0, 100, 255, 0.5)',
+        action: function (evt) {
           let options = Scenario.getInstance().getOptions();
-          let buttons = Scenario.getInstance().getOptions().map((option, index, arr) => {
+          let buttons = Scenario.getInstance().getOptions().map((option) => {
             let optObj = options.getOption(option);
             return {
-              name: option || "No key",
+              name: option || 'No key',
               color: optObj.color,
-              detail: optObj.value || "",
+              detail: optObj.value || '',
               action: () => {
                 let opts = {};
                 opts[option] = null;
                 Scenario.getInstance().setCurrentTool((cell) => {
-                  renderer.toggleStats(true)
+                  renderer.toggleStats(true);
                   cell.setCellOptions(opts);
                 });
                 currentToolSpan.innerHTML = `🔧 Remove option (${option})`;
@@ -407,36 +404,33 @@ document.addEventListener("DOMContentLoaded", function () {
           setTimeout(() => {
             if (!buttons || buttons.length === 0) {
               buttons = [{
-                name: "None",
-                detail: "Set in options",
+                name: 'None',
+                detail: 'Set in options',
                 action: () => {
-                  renderer.toggleStats(true)
+                  renderer.toggleStats(true);
                 }
-
               }];
             }
-            ContextWheel.Show(event.clientX, event.clientY, buttons);
+            ContextWheel.Show(evt.clientX, evt.clientY, buttons);
           });
-
-
         }
       },
       {
-        detail: "Add option",
-        name: "🔧+",
-        color: "rgba(0, 100, 255, 0.5)",
-        action: function () {
+        name: '🔧+',
+        detail: 'Add option',
+        color: 'rgba(0, 100, 255, 0.5)',
+        action: function (evt) {
           let options = Scenario.getInstance().getOptions();
-          let buttons = Scenario.getInstance().getOptions().map((option, index, arr) => {
+          let buttons = Scenario.getInstance().getOptions().map((option) => {
             let optObj = options.getOption(option);
             return {
               name: option,
               color: optObj.color,
-              detail: optObj.value || "",
+              detail: optObj.value || '',
               action: () => {
                 let opts = {};
                 opts[option] = true;
-                renderer.toggleStats(true)
+                renderer.toggleStats(true);
                 Scenario.getInstance().setCurrentTool((cell) => {
                   cell.setCellOptions(opts);
                 });
@@ -448,18 +442,40 @@ document.addEventListener("DOMContentLoaded", function () {
           setTimeout(() => {
             if (!buttons || buttons.length === 0) {
               buttons = [{
-                name: "None",
-                detail: "Set in options",
+                name: 'None',
+                detail: 'Set in options',
                 action: () => {
-                  renderer.toggleStats(true)
+                  renderer.toggleStats(true);
                 }
-
               }];
             }
-            ContextWheel.Show(event.clientX, event.clientY, buttons);
+            ContextWheel.Show(evt.clientX, evt.clientY, buttons);
           });
         }
       }
-    ]);
+    ];
+  }
+
+  const toolObjects = createToolObjects();
+
+  toolObjects.forEach((tool) => {
+    const btn = document.createElement('button');
+    btn.textContent = tool.name;
+    btn.title = tool.detail;
+    btn.addEventListener('click', (e) => tool.action(e));
+    toolsSection?.appendChild(btn);
+  });
+
+  let body = document.querySelector('body');
+
+  body.addEventListener('contextmenu', function (event) {
+    event.preventDefault();
+    const opts = toolObjects.map((tool) => ({
+      name: tool.name,
+      detail: tool.detail,
+      color: tool.color,
+      action: () => tool.action(event)
+    }));
+    ContextWheel.Show(event.clientX, event.clientY, opts);
   });
 });
