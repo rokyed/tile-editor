@@ -34,7 +34,7 @@ export class Tile {
   }
 
   setTileOptions(options) {
-    this.properties = { ...this.properties, ...options };
+    this.properties = { ...options };
   }
 
   getTileOptions() {

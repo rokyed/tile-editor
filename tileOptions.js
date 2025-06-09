@@ -44,6 +44,8 @@ export class TileOptions extends HTMLElement {
 
   render() {
     const scenarioOptions = Scenario.getInstance().getOptions();
+    const previous = this.shadowRoot.querySelector('details');
+    const wasOpen = previous ? previous.open : true;
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -61,11 +63,11 @@ export class TileOptions extends HTMLElement {
           margin-bottom: 4px;
         }
       </style>
-      <details open>
-        <summary>Tile Options</summary>
-        ${this.renderOptions(scenarioOptions)}
-      </details>
-    `;
+        <details ${wasOpen ? 'open' : ''}>
+          <summary>Tile Options</summary>
+          ${this.renderOptions(scenarioOptions)}
+        </details>
+      `;
   }
 }
 
