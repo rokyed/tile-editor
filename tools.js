@@ -21,7 +21,12 @@ export class Tools {
     const brush = Tools.getInstance().currentBrush;
     cell.setTile(brush, layer);
     if (brush) {
-      cell.setCellOptions(brush.getTileOptions());
+      const options = brush.getTileOptions();
+      if (Object.keys(options).length === 0) {
+        cell.clearCellOptions();
+      } else {
+        cell.setCellOptions(options);
+      }
     }
   }
 
@@ -37,7 +42,12 @@ export class Tools {
     cells.forEach((cell) => {
       cell.setTile(brush, layer);
       if (brush) {
-        cell.setCellOptions(brush.getTileOptions());
+        const options = brush.getTileOptions();
+        if (Object.keys(options).length === 0) {
+          cell.clearCellOptions();
+        } else {
+          cell.setCellOptions(options);
+        }
       }
     });
   }
