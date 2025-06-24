@@ -10,6 +10,7 @@ import { ScenarioOptionsModal } from "./scenarioOptionsModal.js";
 import { SaveScenarioModal, LoadScenarioModal } from "./scenarioStorageModals.js";
 import { ContextWheel } from './contextWheel.js';
 import './layerOptions.js';
+import './helpModal.js';
 import { scenarioToCSV, csvToScenario, scenarioToTMX, tmxToScenario } from './exporters.js';
 
 function generateColorTile(color, width, height) {
@@ -43,6 +44,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let scenarioOptionsButton = document.querySelector("button#scenario_options");
   let saveLocalButton = document.querySelector("button#save_local");
   let loadLocalButton = document.querySelector("button#load_local");
+  let helpButton = document.querySelector("button#show_help");
+  let helpModal = document.querySelector("help-modal");
 
   window.addEventListener("tile.interact", function (event) {
     currentTileSpan.innerText = `${event.detail.x}, ${event.detail.y}`;
@@ -75,6 +78,10 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.appendChild(modal);
     }
     modal.openDialog();
+  });
+
+  helpButton?.addEventListener('click', function () {
+    helpModal?.openDialog();
   });
 
   exportTmxButton.addEventListener("click", function () {
@@ -542,5 +549,33 @@ document.addEventListener("DOMContentLoaded", function () {
       action: () => tool.action(event)
     }));
     ContextWheel.Show(event.clientX, event.clientY, opts);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName))
+      return;
+
+    if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+      e.preventDefault();
+      helpModal?.openDialog();
+    } else if (e.key.toLowerCase() === 'p') {
+      Scenario.getInstance().setCurrentTool(Tools.getInstance().paintTool);
+      currentToolSpan.innerHTML = '🖌️ Paint tool';
+    } else if (e.key.toLowerCase() === 'f') {
+      Scenario.getInstance().setCurrentTool(Tools.getInstance().fillTool);
+      currentToolSpan.innerHTML = '🪣 Fill tool';
+    } else if (e.key === '+' || e.key === '=') {
+      renderer.zoomIn();
+    } else if (e.key === '-') {
+      renderer.zoomOut();
+    } else if (e.key === '0') {
+      renderer.zoomReset();
+    } else if (e.key.toLowerCase() === 's' && e.ctrlKey) {
+      e.preventDefault();
+      saveButton.click();
+    } else if (e.key.toLowerCase() === 'l' && e.ctrlKey) {
+      e.preventDefault();
+      loadButton.click();
+    }
   });
 });
