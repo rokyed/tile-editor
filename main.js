@@ -195,6 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let zoomOutButton = document.querySelector("button#zoom_out");
   let zoomResetButton = document.querySelector("button#zoom_reset");
   let toggleStatsButton = document.querySelector("button#toggle_stats");
+  let toggleGridButton = document.querySelector("button#toggle_grid");
 
   zoomInButton.addEventListener("click", function () {
     renderer.zoomIn();
@@ -208,6 +209,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   toggleStatsButton.addEventListener("click", function () {
     renderer.toggleStats();
+  });
+
+  toggleGridButton.addEventListener("click", function () {
+    renderer.toggleGrid();
   });
 
   let loadPaletteButton = document.querySelector("button#load_palette");
