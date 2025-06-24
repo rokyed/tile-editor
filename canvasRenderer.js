@@ -10,6 +10,7 @@ const MIN_HANDLE_SIZE = 20;
 export class XCanvasRenderer extends HTMLElement {
   renderStats = false;
   renderDetails = false;
+  showGrid = false;
   cellSize = DEFAULT_CELL_SIZE;
   xPixel = 0;
   yPixel = 0;
@@ -26,6 +27,10 @@ export class XCanvasRenderer extends HTMLElement {
   constructor() {
     super();
     this.isInteracting = false;
+    const storedGrid = localStorage.getItem('showGrid');
+    if (storedGrid !== null) {
+      this.showGrid = storedGrid === 'true';
+    }
     this.canvas = document.createElement('canvas');
     this.imageRenderer = document.createElement('div');
     this.imageRenderer.style.display = 'none';
@@ -321,6 +326,28 @@ export class XCanvasRenderer extends HTMLElement {
       }
     }
 
+    if (this.showGrid) {
+      const cellsX = rect.width / this.cellSize;
+      const cellsY = rect.height / this.cellSize;
+      const minGX = Math.max(0, Math.floor(this.x - cellsX / 2) - 1);
+      const maxGX = Math.min(scenario.getMapWidth(), Math.ceil(this.x + cellsX / 2) + 1);
+      const minGY = Math.max(0, Math.floor(this.y - cellsY / 2) - 1);
+      const maxGY = Math.min(scenario.getMapHeight(), Math.ceil(this.y + cellsY / 2) + 1);
+      this.ctx.strokeStyle = '#555';
+      this.ctx.beginPath();
+      for (let gx = minGX; gx <= maxGX; gx++) {
+        const sx = centerX + (gx - this.x) * this.cellSize;
+        this.ctx.moveTo(sx, 0);
+        this.ctx.lineTo(sx, this.canvas.height - SCROLLBAR_SIZE);
+      }
+      for (let gy = minGY; gy <= maxGY; gy++) {
+        const sy = centerY + (gy - this.y) * this.cellSize;
+        this.ctx.moveTo(0, sy);
+        this.ctx.lineTo(this.canvas.width - SCROLLBAR_SIZE, sy);
+      }
+      this.ctx.stroke();
+    }
+
     // draw custom scrollbars
     const mapWidthPx = scenario.getMapWidth() * this.cellSize;
     const mapHeightPx = scenario.getMapHeight() * this.cellSize;
@@ -396,6 +423,16 @@ export class XCanvasRenderer extends HTMLElement {
   }
 
   lazyRender() {
+    this.rafRender();
+  }
+
+  toggleGrid(override) {
+    if (override !== undefined) {
+      this.showGrid = override;
+    } else {
+      this.showGrid = !this.showGrid;
+    }
+    localStorage.setItem('showGrid', this.showGrid);
     this.rafRender();
   }
 
