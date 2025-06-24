@@ -23,6 +23,12 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
     instance.setMapSize(data.mapSize[0], data.mapSize[1]);
     instance.currentLayer = 0;
     instance.layerCount = data.layerCount;
+    instance.visibleLayers = data.visibleLayers || {};
+    if (Object.keys(instance.visibleLayers).length === 0) {
+      for (let i = 0; i < instance.layerCount; i++) {
+        instance.visibleLayers[i] = true;
+      }
+    }
     instance.palette = data.palette.map(tile => Tile.deserialize(tile));
     instance.mapCells = data.mapCells.map(cell => Cell.deserialize(cell, instance.palette));
     instance.options = Options.deserialize(data.options, instance);
@@ -39,6 +45,7 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
   mapSize = [0, 0];
   mapCells = [];
   palette = [];
+  visibleLayers = {};
   updatingTimer = null;
   options = null;
 
@@ -53,7 +60,8 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
       mapCells: this.mapCells.map(cell => cell.serialize()),
       palette: this.palette.map(tile => tile.serialize()),
       layerCount: this.layerCount,
-      options: this.options.serialize()
+      options: this.options.serialize(),
+      visibleLayers: this.visibleLayers
     }
   }
 
@@ -93,6 +101,7 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
     this.palette = [];
     this.layerCount = 1;
     this.currentLayer = 0;
+    this.visibleLayers = { 0: true };
     //this.pushImageIntoPalette(defaultImage, defaultImageWidth, defaultImageHeight);
     this.setMapSize(width, height);
     this.fireUpdate();
@@ -159,6 +168,7 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
     if (this.layerCount >= Scenario.DEFAULT_UPPER_LAYER_LIMIT)
       return;
     this.layerCount += 1;
+    this.visibleLayers[this.layerCount - 1] = true;
     this.fireUpdate();
   }
 
@@ -166,6 +176,7 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
     if (this.layerCount <= 1)
       return;
     this.layerCount -= 1;
+    delete this.visibleLayers[this.layerCount];
     this.mapCells.forEach(cell => {
       delete cell.tiles[this.layerCount];
     });
@@ -173,6 +184,15 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
       this.currentLayer = this.layerCount - 1;
     }
     this.fireUpdate();
+  }
+
+  setLayerVisibility(layer, visible) {
+    this.visibleLayers[layer] = visible;
+    this.fireUpdate();
+  }
+
+  isLayerVisible(layer) {
+    return this.visibleLayers[layer] !== false;
   }
 
   setMapHeight(height) {

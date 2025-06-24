@@ -247,6 +247,7 @@ export class XCanvasRenderer extends HTMLElement {
       max = min + 1;
     }
     for (let i = min; i < max; i++) {
+      if (!Scenario.getInstance().isLayerVisible(i)) continue;
       let batch = [];
       for (let c = 0; c < cells.length; c++) {
         let cell = cells[c];
