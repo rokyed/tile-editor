@@ -1,5 +1,6 @@
 import { Cell } from './cell.js';
 import { Tile } from './tile.js';
+import { History } from './history.js';
 import { Options } from './options.js';
 import { defaultImage, defaultImageWidth, defaultImageHeight } from './staticData.js';
 
@@ -27,6 +28,7 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
     instance.mapCells = data.mapCells.map(cell => Cell.deserialize(cell, instance.palette));
     instance.options = Options.deserialize(data.options, instance);
     instance.setAdjacents();
+    History.getInstance().pushState(instance.serialize());
 
     requestAnimationFrame(() => {
       instance.fireUpdate(true);
@@ -45,6 +47,7 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
   constructor(width, height) {
     this.options = new Options(this);
     this.newScenario(width, height);
+    History.getInstance().pushState(this.serialize());
   }
 
   serialize() {
@@ -82,6 +85,7 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
       return;
 
     this.currentTool(cell, this.currentLayer);
+    History.getInstance().pushState(this.serialize());
     this.fireUpdate();
   }
 
@@ -95,6 +99,7 @@ static DEFAULT_UPPER_LAYER_LIMIT = 32;
     this.currentLayer = 0;
     //this.pushImageIntoPalette(defaultImage, defaultImageWidth, defaultImageHeight);
     this.setMapSize(width, height);
+    History.getInstance().pushState(this.serialize());
     this.fireUpdate();
   }
 

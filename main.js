@@ -3,6 +3,7 @@ import { Tools } from "./tools.js";
 import { defaultImage, defaultImageWidth, defaultImageHeight } from "./staticData.js";
 //import './renderer.js';
 import './canvasRenderer.js';
+import { History } from "./history.js";
 import './palette.js';
 import './tileElement.js';
 import './tileOptions.js';
@@ -38,6 +39,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let scenarioOptionsButton = document.querySelector("button#scenario_options");
   let saveLocalButton = document.querySelector("button#save_local");
   let loadLocalButton = document.querySelector("button#load_local");
+  let undoButton = document.querySelector("button#undo");
+  let redoButton = document.querySelector("button#redo");
 
   window.addEventListener("tile.interact", function (event) {
     currentTileSpan.innerText = `${event.detail.x}, ${event.detail.y}`;
@@ -70,6 +73,12 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.appendChild(modal);
     }
     modal.openDialog();
+  });
+  undoButton.addEventListener("click", function () {
+    History.getInstance().undo();
+  });
+  redoButton.addEventListener("click", function () {
+    History.getInstance().redo();
   });
 
   saveButton.addEventListener("click", function () {
@@ -478,5 +487,14 @@ document.addEventListener("DOMContentLoaded", function () {
       action: () => tool.action(event)
     }));
     ContextWheel.Show(event.clientX, event.clientY, opts);
+  });
+  document.addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+      e.preventDefault();
+      History.getInstance().undo();
+    } else if ((e.ctrlKey || e.metaKey) && e.key === "y") {
+      e.preventDefault();
+      History.getInstance().redo();
+    }
   });
 });
