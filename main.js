@@ -11,6 +11,8 @@ import { ScenarioOptionsModal } from "./scenarioOptionsModal.js";
 import { SaveScenarioModal, LoadScenarioModal } from "./scenarioStorageModals.js";
 import { ContextWheel } from './contextWheel.js';
 import './layerOptions.js';
+import './helpModal.js';
+import { scenarioToCSV, csvToScenario, scenarioToTMX, tmxToScenario } from './exporters.js';
 
 function generateColorTile(color, width, height) {
   const canvas = document.createElement('canvas');
@@ -34,6 +36,10 @@ document.addEventListener("DOMContentLoaded", function () {
   let renderer = document.querySelector("x-renderer");
   let saveButton = document.querySelector("button#save");
   let loadButton = document.querySelector("button#load");
+  let exportTmxButton = document.querySelector("button#export_tmx");
+  let importTmxButton = document.querySelector("button#import_tmx");
+  let exportCsvButton = document.querySelector("button#export_csv");
+  let importCsvButton = document.querySelector("button#import_csv");
   let currentToolSpan = document.querySelector("span#current_tool");
   let currentTileSpan = document.querySelector("span#current_tile");
   let scenarioOptionsButton = document.querySelector("button#scenario_options");
@@ -41,6 +47,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let loadLocalButton = document.querySelector("button#load_local");
   let undoButton = document.querySelector("button#undo");
   let redoButton = document.querySelector("button#redo");
+  let helpButton = document.querySelector("button#show_help");
+  let helpModal = document.querySelector("help-modal");
 
   window.addEventListener("tile.interact", function (event) {
     currentTileSpan.innerText = `${event.detail.x}, ${event.detail.y}`;
@@ -79,6 +87,64 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   redoButton.addEventListener("click", function () {
     History.getInstance().redo();
+  });
+
+  helpButton?.addEventListener('click', function () {
+    helpModal?.openDialog();
+  });
+
+  exportTmxButton.addEventListener("click", function () {
+    const tmx = scenarioToTMX(Scenario.getInstance());
+    const blob = new Blob([tmx], { type: "text/xml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "scenario.tmx";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  importTmxButton.addEventListener("click", function () {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".tmx,.xml";
+    fileInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        tmxToScenario(reader.result);
+      };
+      reader.readAsText(file);
+    });
+    fileInput.click();
+  });
+
+  exportCsvButton.addEventListener("click", function () {
+    const csv = scenarioToCSV(Scenario.getInstance());
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "scenario.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  importCsvButton.addEventListener("click", function () {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".csv";
+    fileInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        csvToScenario(reader.result);
+      };
+      reader.readAsText(file);
+    });
+    fileInput.click();
   });
 
   saveButton.addEventListener("click", function () {
@@ -145,6 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let zoomOutButton = document.querySelector("button#zoom_out");
   let zoomResetButton = document.querySelector("button#zoom_reset");
   let toggleStatsButton = document.querySelector("button#toggle_stats");
+  let toggleGridButton = document.querySelector("button#toggle_grid");
 
   zoomInButton.addEventListener("click", function () {
     renderer.zoomIn();
@@ -158,6 +225,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   toggleStatsButton.addEventListener("click", function () {
     renderer.toggleStats();
+  });
+
+  toggleGridButton.addEventListener("click", function () {
+    renderer.toggleGrid();
   });
 
   let loadPaletteButton = document.querySelector("button#load_palette");
@@ -488,13 +559,38 @@ document.addEventListener("DOMContentLoaded", function () {
     }));
     ContextWheel.Show(event.clientX, event.clientY, opts);
   });
-  document.addEventListener("keydown", function (e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+  
+  document.addEventListener('keydown', function (e) {
+    if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName))
+      return;
+
+    if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+      e.preventDefault();
+      helpModal?.openDialog();
+    } else if (e.key.toLowerCase() === 'p') {
+      Scenario.getInstance().setCurrentTool(Tools.getInstance().paintTool);
+      currentToolSpan.innerHTML = '🖌️ Paint tool';
+    } else if (e.key.toLowerCase() === 'f') {
+      Scenario.getInstance().setCurrentTool(Tools.getInstance().fillTool);
+      currentToolSpan.innerHTML = '🪣 Fill tool';
+    } else if (e.key === '+' || e.key === '=') {
+      renderer.zoomIn();
+    } else if (e.key === '-') {
+      renderer.zoomOut();
+    } else if ((e.ctrlKey || e.metaKey) && e.key === "z") {
       e.preventDefault();
       History.getInstance().undo();
     } else if ((e.ctrlKey || e.metaKey) && e.key === "y") {
       e.preventDefault();
       History.getInstance().redo();
+    } else if (e.key === '0') {
+      renderer.zoomReset();
+    } else if (e.key.toLowerCase() === 's' && e.ctrlKey) {
+      e.preventDefault();
+      saveButton.click();
+    } else if (e.key.toLowerCase() === 'l' && e.ctrlKey) {
+      e.preventDefault();
+      loadButton.click();
     }
   });
 });

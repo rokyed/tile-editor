@@ -9,6 +9,7 @@ export class LayerOptions extends HTMLElement {
   connectedCallback() {
     this.render();
     this.shadowRoot.addEventListener("click", this.onClick.bind(this));
+    this.shadowRoot.addEventListener("change", this.onChange.bind(this));
     window.addEventListener("update.ui", () => this.update());
   }
 
@@ -23,6 +24,14 @@ export class LayerOptions extends HTMLElement {
     }
   }
 
+  onChange(event) {
+    const checkbox = event.target.closest('input[data-layer]');
+    if (checkbox) {
+      const layer = parseInt(checkbox.getAttribute('data-layer'));
+      Scenario.getInstance().setLayerVisibility(layer, checkbox.checked);
+    }
+  }
+
   update() {
     const scenario = Scenario.getInstance();
     const countSpan = this.shadowRoot.querySelector("#layer_count");
@@ -32,6 +41,14 @@ export class LayerOptions extends HTMLElement {
     const layerView = this.shadowRoot.querySelector('[name="current_layer"]');
     if (layerView) {
       layerView.textContent = `Current layer: ${scenario.currentLayer}`;
+    }
+    const list = this.shadowRoot.querySelector('#layer_visibility');
+    if (list) {
+      list.innerHTML = '';
+      for (let i = 0; i < scenario.layerCount; i++) {
+        const checked = scenario.isLayerVisible(i) ? 'checked' : '';
+        list.innerHTML += `<label><input type="checkbox" data-layer="${i}" ${checked}/> ${i}</label>`;
+      }
     }
   }
 
@@ -78,6 +95,7 @@ export class LayerOptions extends HTMLElement {
           <button id="layer_up">+</button>
           <button id="toggle_only_layer">Only</button>
         </div>
+        <div id="layer_visibility" class="row"></div>
       </details>
     `;
     this.update();
