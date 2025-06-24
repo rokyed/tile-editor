@@ -10,6 +10,7 @@ import { ScenarioOptionsModal } from "./scenarioOptionsModal.js";
 import { SaveScenarioModal, LoadScenarioModal } from "./scenarioStorageModals.js";
 import { ContextWheel } from './contextWheel.js';
 import './layerOptions.js';
+import { scenarioToCSV, csvToScenario, scenarioToTMX, tmxToScenario } from './exporters.js';
 
 function generateColorTile(color, width, height) {
   const canvas = document.createElement('canvas');
@@ -33,6 +34,10 @@ document.addEventListener("DOMContentLoaded", function () {
   let renderer = document.querySelector("x-renderer");
   let saveButton = document.querySelector("button#save");
   let loadButton = document.querySelector("button#load");
+  let exportTmxButton = document.querySelector("button#export_tmx");
+  let importTmxButton = document.querySelector("button#import_tmx");
+  let exportCsvButton = document.querySelector("button#export_csv");
+  let importCsvButton = document.querySelector("button#import_csv");
   let currentToolSpan = document.querySelector("span#current_tool");
   let currentTileSpan = document.querySelector("span#current_tile");
   let scenarioOptionsButton = document.querySelector("button#scenario_options");
@@ -70,6 +75,60 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.appendChild(modal);
     }
     modal.openDialog();
+  });
+
+  exportTmxButton.addEventListener("click", function () {
+    const tmx = scenarioToTMX(Scenario.getInstance());
+    const blob = new Blob([tmx], { type: "text/xml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "scenario.tmx";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  importTmxButton.addEventListener("click", function () {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".tmx,.xml";
+    fileInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        tmxToScenario(reader.result);
+      };
+      reader.readAsText(file);
+    });
+    fileInput.click();
+  });
+
+  exportCsvButton.addEventListener("click", function () {
+    const csv = scenarioToCSV(Scenario.getInstance());
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "scenario.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  importCsvButton.addEventListener("click", function () {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".csv";
+    fileInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        csvToScenario(reader.result);
+      };
+      reader.readAsText(file);
+    });
+    fileInput.click();
   });
 
   saveButton.addEventListener("click", function () {
